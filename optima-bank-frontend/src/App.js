@@ -1,0 +1,18 @@
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import SignupPage from './Page/Signup';
+import LoginPage from './Page/login';
+import Dashboard from './Page/Dashboard';
+
+function App() {
+  return (
+    <Router>
+      <Routes>
+        <Route path="/signup" element={<SignupPage />} />
+        <Route path="/" element={<LoginPage />} />
+        <Route path="/dashboard" element={<Dashboard />} />
+      </Routes>
+    </Router>
+  );
+}
+
+export default App;
