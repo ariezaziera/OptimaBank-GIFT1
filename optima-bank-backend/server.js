@@ -1,30 +1,36 @@
+const dotenv = require('dotenv');
+dotenv.config(); // ✅ Load .env variables FIRST
+
 const express = require('express');
 const mongoose = require('mongoose');
-const dotenv = require('dotenv');
 const cors = require('cors');
 const User = require('./models/User');
 const passport = require('passport');
-require('./passport');
+require('./passport'); // ✅ AFTER .env loaded
 
-dotenv.config();
-const app = express();
+const session = require('express-session');
+const app = express(); // ✅ DECLARE THIS FIRST!
+
+// Middleware
 app.use(cors({
   origin: 'http://localhost:3000',
+  credentials: true,
   methods: ['GET', 'POST'],
 }));
+
 app.use(express.json());
 
-const session = require('cookie-session');
 app.use(session({
-  name: 'session',
-  keys: ['key1', 'key2'],
-  maxAge: 24 * 60 * 60 * 1000
+  secret: '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', // Ideally from process.env
+  resave: false,
+  saveUninitialized: false,
+  cookie: { maxAge: 24 * 60 * 60 * 1000 }
 }));
 
 app.use(passport.initialize());
 app.use(passport.session());
 
-// Sambung MongoDB
+// MongoDB
 mongoose.connect(process.env.MONGO_URI, {
   useNewUrlParser: true,
   useUnifiedTopology: true
@@ -32,30 +38,25 @@ mongoose.connect(process.env.MONGO_URI, {
 .then(() => console.log('MongoDB connected'))
 .catch((err) => console.error('MongoDB error:', err));
 
-// API: Signup
+// Signup route
 app.post('/signup', async (req, res) => {
   const { firstName, lastName, dob, phone, email, password } = req.body;
-
-  console.log('Received signup data:', req.body); // Tambah ni
 
   try {
     const userExist = await User.findOne({ email });
     if (userExist) {
-      console.log('User already exists');
       return res.status(400).json({ message: 'User already exists' });
     }
 
-    const newUser = new User({ firstName, lastName, dob, phone, email, password });
+    const newUser = new User({ firstName, lastName, dob, phone, email, password, provider: 'local', });
     await newUser.save();
-    console.log('User saved to DB');
     res.status(201).json({ message: 'User registered successfully' });
   } catch (err) {
-    console.error('Server error:', err);
     res.status(500).json({ message: 'Server error' });
   }
 });
 
-// API: Login
+// Login route
 app.post('/login', async (req, res) => {
   const { email, password } = req.body;
 
@@ -73,7 +74,7 @@ app.post('/login', async (req, res) => {
   }
 });
 
-// Google Auth Routes
+// Google OAuth
 app.get('/auth/google',
   passport.authenticate('google', { scope: ['profile', 'email'] })
 );
@@ -84,17 +85,10 @@ app.get('/auth/google/callback',
     session: true
   }),
   (req, res) => {
-    // Redirect after successful login
-    res.redirect('http://localhost:3000/dashboard'); // or your frontend route
+    res.redirect('http://localhost:3000/dashboard');
   }
 );
 
 // Start server
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
-
-app.use(cors({
-  origin: 'http://localhost:3000',
-  credentials: true, // 🔥 Add this
-  methods: ['GET', 'POST'],
-}));

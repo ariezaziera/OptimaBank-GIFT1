@@ -68,7 +68,7 @@ export default function LoginPage() {
           </button>
         </form>
 
-        <a href="http://localhost:3000/auth/google">
+        <a href="http://localhost:5000/auth/google">
           <button className="btn btn-google">Continue with Google</button>
         </a>
 
