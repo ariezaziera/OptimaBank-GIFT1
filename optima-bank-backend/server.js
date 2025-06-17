@@ -3,6 +3,8 @@ const mongoose = require('mongoose');
 const dotenv = require('dotenv');
 const cors = require('cors');
 const User = require('./models/User');
+const passport = require('passport');
+require('./passport');
 
 dotenv.config();
 const app = express();
@@ -11,6 +13,16 @@ app.use(cors({
   methods: ['GET', 'POST'],
 }));
 app.use(express.json());
+
+const session = require('cookie-session');
+app.use(session({
+  name: 'session',
+  keys: ['key1', 'key2'],
+  maxAge: 24 * 60 * 60 * 1000
+}));
+
+app.use(passport.initialize());
+app.use(passport.session());
 
 // Sambung MongoDB
 mongoose.connect(process.env.MONGO_URI, {
@@ -61,6 +73,28 @@ app.post('/login', async (req, res) => {
   }
 });
 
+// Google Auth Routes
+app.get('/auth/google',
+  passport.authenticate('google', { scope: ['profile', 'email'] })
+);
+
+app.get('/auth/google/callback',
+  passport.authenticate('google', {
+    failureRedirect: '/login',
+    session: true
+  }),
+  (req, res) => {
+    // Redirect after successful login
+    res.redirect('http://localhost:3000/dashboard'); // or your frontend route
+  }
+);
+
 // Start server
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+
+app.use(cors({
+  origin: 'http://localhost:3000',
+  credentials: true, // 🔥 Add this
+  methods: ['GET', 'POST'],
+}));

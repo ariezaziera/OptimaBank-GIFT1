@@ -67,6 +67,11 @@ export default function LoginPage() {
             Login
           </button>
         </form>
+
+        <a href="http://localhost:5000/auth/google">
+          <button className="btn btn-google">Continue with Google</button>
+        </a>
+
         <p className="text-center text-white mt-4">
           Don't have an account? <Link to="/signup" className="underline text-white">Signup</Link>
         </p>
