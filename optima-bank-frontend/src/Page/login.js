@@ -1,6 +1,7 @@
 // src/Login.js
 import React, { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom'; // ✅ Import Link juga!
+import { useNavigate, Link } from 'react-router-dom';
+import AuthLayout from '../AuthLayout';
 
 export default function LoginPage() {
   const navigate = useNavigate();
@@ -41,41 +42,52 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-cover bg-center" style={{ backgroundImage: "url('Background.jpeg')" }}>
-      <div className="bg-white bg-opacity-20 p-10 rounded-2xl shadow-lg max-w-md w-full backdrop-blur-md">
-        <h2 className="text-white text-3xl font-bold text-center mb-6">Login</h2>
-        <form className="space-y-4" onSubmit={handleSubmit}>
-          <input
-            type="email"
-            name="email"
-            placeholder="Email"
-            className="w-full p-3 rounded-lg outline-none"
-            onChange={handleChange}
-            value={formData.email}
-            required
-          />
-          <input
-            type="password"
-            name="password"
-            placeholder="Password"
-            className="w-full p-3 rounded-lg outline-none"
-            onChange={handleChange}
-            value={formData.password}
-            required
-          />
-          <button type="submit" className="w-full bg-white text-black font-bold py-2 rounded-full">
-            Login
-          </button>
-        </form>
+    <AuthLayout bgImage="">
+      <h2 className="text-white text-3xl font-bold text-center mb-6">Login</h2>
+      <form className="space-y-4" onSubmit={handleSubmit}>
+        <input
+          type="email"
+          name="email"
+          placeholder="Email"
+          className="w-full p-3 rounded-lg outline-none"
+          onChange={handleChange}
+          value={formData.email}
+          required
+        />
+        <input
+          type="password"
+          name="password"
+          placeholder="Password"
+          className="w-full p-3 rounded-lg outline-none"
+          onChange={handleChange}
+          value={formData.password}
+          required
+        />
+        <button type="submit" className="w-full bg-white text-black font-bold py-2 rounded-full">
+          Login
+        </button>
+      </form>
 
+      <div className="mt-4 flex flex-col gap-3">
         <a href="http://localhost:5000/auth/google">
-          <button className="btn btn-google">Continue with Google</button>
+          <button className="w-full bg-white text-black font-bold py-2 rounded-full">
+            Continue with Google
+          </button>
         </a>
 
-        <p className="text-center text-white mt-4">
-          Don't have an account? <Link to="/signup" className="underline text-white">Signup</Link>
-        </p>
+        <div className="text-center">
+          <Link to="/forgot-password" className="text-sm underline text-white hover:text-gray-200">
+            Forgot Password?
+          </Link>
+        </div>
       </div>
-    </div>
+
+      <p className="text-center text-white mt-4">
+        Don’t have an account?{' '}
+        <Link to="/signup" className="underline text-white hover:text-gray-200">
+          Signup
+        </Link>
+      </p>
+    </AuthLayout>
   );
 }

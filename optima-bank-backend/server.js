@@ -11,11 +11,14 @@ require('./passport'); // ✅ AFTER .env loaded
 const session = require('express-session');
 const app = express(); // ✅ DECLARE THIS FIRST!
 
+const crypto = require('crypto');
+const nodemailer = require('nodemailer');
+
 // Middleware
 app.use(cors({
   origin: 'http://localhost:3000',
   credentials: true,
-  methods: ['GET', 'POST'],
+  methods: ['GET', 'POST', 'DELETE'],
 }));
 
 app.use(express.json());
@@ -48,7 +51,19 @@ app.post('/signup', async (req, res) => {
       return res.status(400).json({ message: 'User already exists' });
     }
 
-    const newUser = new User({ firstName, lastName, dob, phone, email, password, provider: 'local', });
+    const bcrypt = require('bcrypt');
+    const saltRounds = 10;
+
+    const hashedPassword = await bcrypt.hash(password, saltRounds);
+    const newUser = new User({ 
+      firstName, 
+      lastName, 
+      dob, 
+      phone, 
+      email, 
+      password: hashedPassword, 
+      provider: 'local', 
+    });
     await newUser.save();
     res.status(201).json({ message: 'User registered successfully' });
   } catch (err) {
@@ -64,6 +79,7 @@ app.post('/login', async (req, res) => {
     const user = await User.findOne({ email });
     if (!user) return res.status(400).json({ message: 'User not found' });
 
+    const isMatch = await bcrypt.compare(password, user.password);
     if (user.password !== password) {
       return res.status(400).json({ message: 'Invalid password' });
     }
@@ -71,6 +87,68 @@ app.post('/login', async (req, res) => {
     res.status(200).json({ message: 'Login successful', user });
   } catch (err) {
     res.status(500).json({ message: 'Server error' });
+  }
+});
+
+// Forgot password route
+app.post('/forgot-password', async (req, res) => {
+  const { email } = req.body;
+  try {
+    const user = await User.findOne({ email });
+    if (!user) return res.status(404).json({ message: 'User not found' });
+
+    const token = crypto.randomBytes(20).toString('hex');
+    user.resetToken = token;
+    user.tokenExpiry = Date.now() + 3600000;
+    await user.save();
+
+    console.log(`Reset token generated for ${email}: ${token}`);
+
+    const transporter = nodemailer.createTransport({
+      service: 'gmail',
+      auth: {
+        user: process.env.MAIL_USER,
+        pass: process.env.MAIL_PASS,
+      },
+    });
+
+    const mailOptions = {
+      to: user.email,
+      from: process.env.MAIL_USER,
+      subject: 'Password Reset',
+      text: `Click this link to reset your password: http://localhost:3000/reset-password/${token}`,
+    };
+
+    await transporter.sendMail(mailOptions);
+    res.json({ message: 'Reset email sent!' });
+
+  } catch (err) {
+    console.error('Forgot password error:', err); // ✅ LOG IT
+    res.status(500).json({ message: 'Error sending email' });
+  }
+});
+
+app.post('/reset-password/:token', async (req, res) => {
+  const { token } = req.params;
+  const { password } = req.body;
+
+  try {
+    const user = await User.findOne({
+      resetToken: token,
+      tokenExpiry: { $gt: Date.now() }, // still valid
+    });
+
+    if (!user) return res.status(400).json({ message: 'Invalid or expired token' });
+
+    const hashedPassword = await bcrypt.hash(newPassword, saltRounds);
+    user.password = hashedPassword;
+    user.resetToken = undefined;
+    user.tokenExpiry = undefined;
+    await user.save();
+
+    res.json({ message: 'Password has been reset!' });
+  } catch (err) {
+    res.status(500).json({ message: 'Error resetting password' });
   }
 });
 
@@ -88,6 +166,16 @@ app.get('/auth/google/callback',
     res.redirect('http://localhost:3000/dashboard');
   }
 );
+
+app.get('/logout', (req, res) => {
+  req.logout(err => {
+    if (err) return res.status(500).json({ message: 'Logout error' });
+    req.session.destroy(() => {
+      res.clearCookie('session');
+      res.json({ message: 'Logged out' });
+    });
+  });
+});
 
 // Start server
 const PORT = process.env.PORT || 5000;

@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import AuthLayout from '../AuthLayout';
 
 export default function Signup() {
   const navigate = useNavigate();
@@ -52,9 +53,8 @@ export default function Signup() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-cover bg-center px-4" style={{ backgroundImage: "url('Background.jpeg')" }}>
-      <div className="bg-white bg-opacity-20 p-10 rounded-2xl shadow-lg max-w-2xl w-full backdrop-blur-md">
-        <h2 className="text-white text-3xl font-bold text-center mb-6">Signup</h2>
+    <AuthLayout bgImage="">
+      <h2 className="text-white text-3xl font-bold text-center mb-6">Signup</h2>
         <form className="grid grid-cols-2 gap-4" onSubmit={handleSubmit}>
           <input type="text" name="firstName" placeholder="First Name" onChange={handleChange} value={formData.firstName} className="p-3 rounded-lg outline-none" autoComplete="off" required />
           <input type="text" name="lastName" placeholder="Last Name" onChange={handleChange} value={formData.lastName} className="p-3 rounded-lg outline-none" autoComplete="off" required />
@@ -67,8 +67,8 @@ export default function Signup() {
         </form>
         <p className="text-center text-white mt-4">
           Already have an account? <Link to="/" className="underline text-white">Login</Link>
-        </p>
-      </div>
-    </div>
+        </p>  
+    </AuthLayout>
+    
   );
 }

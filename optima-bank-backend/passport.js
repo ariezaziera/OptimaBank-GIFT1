@@ -1,42 +1,9 @@
 const passport = require('passport');
 const GoogleStrategy = require('passport-google-oauth20').Strategy;
-const User = require('./models/User'); // adjust path if needed
-
-passport.use(
-  new GoogleStrategy(
-    {
-      clientID: process.env.GOOGLE_CLIENT_ID,     // ✅ from your .env file
-      clientSecret: process.env.GOOGLE_CLIENT_SECRET, // ✅ from your .env file
-      callbackURL: '/auth/google/callback',
-    },
-    async (accessToken, refreshToken, profile, done) => {
-      // You can log the profile to see what you get
-      console.log(profile);
-
-      try {
-        let user = await User.findOne({ googleId: profile.id });
-
-        if (!user) {
-          user = new User({
-            firstName: profile.name.givenName,
-            lastName: profile.name.familyName,
-            email: profile.emails[0].value,
-            provider: 'google',
-          });
-
-          await user.save();
-        }
-
-        return done(null, user);
-      } catch (err) {
-        return done(err, null);
-      }
-    }
-  )
-);
+const User = require('./models/User');
 
 passport.serializeUser((user, done) => {
-  done(null, user.id);
+  done(null, user.id); // save MongoDB user ID to session
 });
 
 passport.deserializeUser(async (id, done) => {
@@ -47,3 +14,34 @@ passport.deserializeUser(async (id, done) => {
     done(err, null);
   }
 });
+
+passport.use(new GoogleStrategy({
+  clientID: process.env.GOOGLE_CLIENT_ID,
+  clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+  callbackURL: '/auth/google/callback',
+},
+async (accessToken, refreshToken, profile, done) => {
+  try {
+    const email = profile.emails[0].value.toLowerCase();
+    let user = await User.findOne({ email });
+    
+    if (user) {
+      // 👉 User exists, just log them in
+      return done(null, user);
+    }
+
+    // ❌ If not exist, create a new one
+    user = new User({
+      firstName: profile.name.givenName || 'GoogleUser',
+      lastName: profile.name.familyName || '',
+      email: email,
+      provider: 'google',
+      password: '', // Or optional, depending on your schema
+    });
+
+    await user.save();
+    return done(null, user);
+  } catch (err) {
+    return done(err, null);
+  }
+}));

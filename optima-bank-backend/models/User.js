@@ -5,7 +5,7 @@ const userSchema = new mongoose.Schema({
   lastName: String,
   dob: Date,
   phone: String,
-  email: { type: String, required: true, unique: true },
+  email: { type: String, required: true, unique: true, lowercase: true, },
   password: {
     type: String,
     required: function () {
@@ -15,7 +15,9 @@ const userSchema = new mongoose.Schema({
   provider: {
     type: String,
     default: 'local' // 'google' or 'local'
-  }
+  },
+  resetToken: String,
+  tokenExpiry: Date,
 });
 
 module.exports = mongoose.model('User', userSchema);
