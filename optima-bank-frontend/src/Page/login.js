@@ -24,13 +24,15 @@ export default function LoginPage() {
         headers: {
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify(formData)
+        body: JSON.stringify(formData),
+        credentials: 'include',
       });
 
       const data = await res.json();
 
       if (res.ok) {
         alert('Login successful!');
+        localStorage.setItem("user", JSON.stringify(data.user));
         navigate('/dashboard');
         console.log(data);
       } else {
