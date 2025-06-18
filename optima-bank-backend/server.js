@@ -14,6 +14,9 @@ const app = express(); // ✅ DECLARE THIS FIRST!
 const crypto = require('crypto');
 const nodemailer = require('nodemailer');
 
+const bcrypt = require('bcrypt');
+const saltRounds = 10;
+
 // Middleware
 app.use(cors({
   origin: 'http://localhost:3000',
@@ -51,9 +54,6 @@ app.post('/signup', async (req, res) => {
       return res.status(400).json({ message: 'User already exists' });
     }
 
-    const bcrypt = require('bcrypt');
-    const saltRounds = 10;
-
     const hashedPassword = await bcrypt.hash(password, saltRounds);
     const newUser = new User({ 
       firstName, 
@@ -80,12 +80,11 @@ app.post('/login', async (req, res) => {
     if (!user) return res.status(400).json({ message: 'User not found' });
 
     const isMatch = await bcrypt.compare(password, user.password);
-    if (user.password !== password) {
-      return res.status(400).json({ message: 'Invalid password' });
-    }
+    if (!isMatch) return res.status(400).json({ message: 'Invalid password' });
 
     res.status(200).json({ message: 'Login successful', user });
   } catch (err) {
+    console.error('Login error:', err); // ✅ Log exact error
     res.status(500).json({ message: 'Server error' });
   }
 });
@@ -140,7 +139,7 @@ app.post('/reset-password/:token', async (req, res) => {
 
     if (!user) return res.status(400).json({ message: 'Invalid or expired token' });
 
-    const hashedPassword = await bcrypt.hash(newPassword, saltRounds);
+    const hashedPassword = await bcrypt.hash(password, saltRounds);
     user.password = hashedPassword;
     user.resetToken = undefined;
     user.tokenExpiry = undefined;

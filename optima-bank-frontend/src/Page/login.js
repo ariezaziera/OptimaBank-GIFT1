@@ -2,6 +2,7 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import AuthLayout from '../AuthLayout';
+import { FcGoogle } from 'react-icons/fc';
 
 export default function LoginPage() {
   const navigate = useNavigate();
@@ -69,11 +70,12 @@ export default function LoginPage() {
       </form>
 
       <div className="mt-4 flex flex-col gap-3">
-        <a href="http://localhost:5000/auth/google">
-          <button className="w-full bg-white text-black font-bold py-2 rounded-full">
-            Continue with Google
-          </button>
-        </a>
+      <a href="http://localhost:5000/auth/google">
+        <button className="w-3/4 mx-auto bg-white text-black font-bold py-2 rounded-full flex items-center justify-center gap-2">
+          <FcGoogle size={20} />
+          Continue with Google
+        </button>
+      </a>
 
         <div className="text-center">
           <Link to="/forgot-password" className="text-sm underline text-white hover:text-gray-200">
