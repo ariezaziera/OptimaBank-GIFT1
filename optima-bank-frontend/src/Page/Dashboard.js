@@ -7,12 +7,22 @@ const Dashboard = () => {
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
-    const isGoogleLogin = params.get('login');
+    const email = params.get('email');
 
-    if (isGoogleLogin === 'google') {
-      alert('Google login successful!');
-      params.delete('login');
-      window.history.replaceState({}, '', window.location.pathname); // clean URL
+    if (email) {
+      const user = {
+        _id: params.get('_id'),
+        firstName: params.get('firstName'),
+        lastName: params.get('lastName'),
+        email,
+        profileImage: params.get('profileImage'),
+      };
+      localStorage.setItem('user', JSON.stringify(user));
+      setUser(user);
+      alert("Login successful!");
+
+      // Optional: Clean up query string
+      window.history.replaceState({}, '', window.location.pathname);
     }
   }, []);
 
