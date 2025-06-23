@@ -1,9 +1,20 @@
 // src/Page/Dashboard.js
 import React, { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
+import Navbar from '../Navbar';
 
 const Dashboard = () => {
   const [user, setUser] = useState(null);
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const isGoogleLogin = params.get('login');
+
+    if (isGoogleLogin === 'google') {
+      alert('Google login successful!');
+      params.delete('login');
+      window.history.replaceState({}, '', window.location.pathname); // clean URL
+    }
+  }, []);
 
   useEffect(() => {
     const savedUser = JSON.parse(localStorage.getItem('user'));
@@ -33,17 +44,7 @@ const Dashboard = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-r from-blue-200 to-white text-blue-950 px-6 py-6">
-      {/* Header */}
-      <header className="flex justify-between items-center py-4 border-b border-blue-300">
-        <h1 className="text-2xl font-bold">Optima Bank</h1>
-        <nav className="flex gap-4">
-          <Link to="/Dashboard" className="hover:underline">Home</Link>
-          <Link to="/Profile" className="hover:underline">Profile</Link>
-          <button onClick={handleLogout} className="bg-red-500 hover:bg-red-600 text-white font-semibold px-4 py-1 rounded-md">
-            Logout
-          </button>
-        </nav>
-      </header>
+        <Navbar user={user} handleLogout={handleLogout} />
 
       {/* Welcome Section */}
       <main className="max-w-4xl mx-auto mt-12 bg-white/10 backdrop-blur-md p-8 rounded-xl shadow-md">

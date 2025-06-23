@@ -3,14 +3,17 @@ import React from 'react';
 import './AuthLayout.css'; // optional
 
 const AuthLayout = ({ children, bgImage }) => {
-  const defaultBg = "url('/Background.jpeg')"; // Put your default image path here
+  const defaultBg = "url('/bg.png')"; // Put your default image path here
 
   return (
     <div
       className="min-h-screen flex items-center justify-center bg-cover bg-center"
       style={{ backgroundImage: bgImage ? `url(${bgImage})` : defaultBg }}
     >
-      <div className="bg-white bg-opacity-20 p-10 rounded-2xl shadow-lg max-w-md w-full backdrop-blur-md">
+      <div
+        className="ml-auto mr-0 p-8 rounded-3xl shadow-lg w-96 backdrop-blur-md"
+        style={{ backgroundColor: 'rgba(3, 49, 66, 0.4)' }}
+      >
         {children}
       </div>
     </div>

@@ -25,7 +25,7 @@ const saltRounds = 10;
 app.use(cors({
   origin: 'http://localhost:3000',
   credentials: true,
-  methods: ['GET', 'POST', 'DELETE'],
+  methods: ['GET', 'POST', 'PUT', 'DELETE'],
 }));
 
 app.use(express.json());
@@ -41,10 +41,7 @@ app.use(passport.initialize());
 app.use(passport.session());
 
 // MongoDB
-mongoose.connect(process.env.MONGO_URI, {
-  useNewUrlParser: true,
-  useUnifiedTopology: true
-})
+mongoose.connect(process.env.MONGO_URI)
 .then(() => console.log('MongoDB connected'))
 .catch((err) => console.error('MongoDB error:', err));
 
@@ -166,7 +163,17 @@ app.get('/auth/google/callback',
     session: true
   }),
   (req, res) => {
-    res.redirect('http://localhost:3000/dashboard');
+    // Option 1: Send user info via redirect query
+    const user = req.user;
+    const safeUser = {
+      _id: user._id,
+      email: user.email,
+      firstName: user.firstName,
+      lastName: user.lastName,
+      profileImage: user.profileImage || ''
+    };
+    const query = new URLSearchParams(safeUser).toString();
+    res.redirect(`http://localhost:3000/dashboard?${query}`);
   }
 );
 
@@ -188,28 +195,6 @@ const storage = multer.diskStorage({
 });
 const upload = multer({ storage });
 app.use('/uploads', express.static('uploads'));
-
-// Models
-const userSchema = new mongoose.Schema({
-  firstName: String,
-  lastName: String,
-  username: String,
-  email: String,
-  phone: String,
-  password: String,
-  gender: String,
-  language: String,
-  address: String,
-  postcode: String,
-  country: String,
-  payment: String,
-  dob: Date,
-  profileImage: String,
-  provider: String,
-  resetToken: String,
-  tokenExpiry: Date,
-});
-module.exports = mongoose.models.User || mongoose.model('User', updatedUserSchema);
 
 app.get('/profile/:id', async (req, res) => {
   try {

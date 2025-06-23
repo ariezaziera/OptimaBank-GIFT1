@@ -1,8 +1,8 @@
 // src/Login.js
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import AuthLayout from '../AuthLayout';
 import { FcGoogle } from 'react-icons/fc';
+import Navbar from '../Navbar';
 
 export default function LoginPage() {
   const navigate = useNavigate();
@@ -45,14 +45,24 @@ export default function LoginPage() {
   };
 
   return (
-    <AuthLayout bgImage="">
+    <div
+      className="min-h-screen flex items-center justify-center bg-cover bg-center"
+      style={{ backgroundImage: "url('/bg.png')" }}
+    >
+
+    <Navbar />  
+    
+      <div
+        className="ml-auto mr-36 p-8 rounded-3xl shadow-lg w-96"
+        style={{ backgroundColor: 'rgba(3, 49, 66, 0.6)' }}
+      >
       <h2 className="text-white text-3xl font-bold text-center mb-6">Login</h2>
       <form className="space-y-4" onSubmit={handleSubmit}>
         <input
           type="email"
           name="email"
           placeholder="Email"
-          className="w-full p-3 rounded-lg outline-none"
+          className="w-full p-3 pl-5 rounded-3xl border-2 border-white bg-transparent text-white placeholder-white outline-none focus:ring-2 focus:ring-white"
           onChange={handleChange}
           value={formData.email}
           required
@@ -61,12 +71,17 @@ export default function LoginPage() {
           type="password"
           name="password"
           placeholder="Password"
-          className="w-full p-3 rounded-lg outline-none"
+          className="w-full p-3 pl-5 rounded-3xl border-2 border-white bg-transparent text-white placeholder-white outline-none focus:ring-2 focus:ring-white"
           onChange={handleChange}
           value={formData.password}
           required
         />
-        <button type="submit" className="w-full bg-white text-black font-bold py-2 rounded-full">
+        <div className="text-center">
+          <Link to="/forgot-password" className="text-sm underline text-white hover:text-gray-200">
+            Forgot Password?
+          </Link>
+        </div>
+        <button type="submit" className="w-1/2 mx-auto block bg-white text-black font-bold py-2 rounded-full">
           Login
         </button>
       </form>
@@ -79,11 +94,7 @@ export default function LoginPage() {
         </button>
       </a>
 
-        <div className="text-center">
-          <Link to="/forgot-password" className="text-sm underline text-white hover:text-gray-200">
-            Forgot Password?
-          </Link>
-        </div>
+        
       </div>
 
       <p className="text-center text-white mt-4">
@@ -92,6 +103,7 @@ export default function LoginPage() {
           Signup
         </Link>
       </p>
-    </AuthLayout>
+      </div>
+    </div>
   );
 }
