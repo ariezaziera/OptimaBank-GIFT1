@@ -5,6 +5,8 @@ const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
 const User = require('./models/User');
+const multer = require('multer');
+const path = require('path');
 const passport = require('passport');
 require('./passport'); // ✅ AFTER .env loaded
 
@@ -16,6 +18,8 @@ const nodemailer = require('nodemailer');
 
 const bcrypt = require('bcrypt');
 const saltRounds = 10;
+
+
 
 // Middleware
 app.use(cors({
@@ -174,6 +178,65 @@ app.get('/logout', (req, res) => {
       res.json({ message: 'Logged out' });
     });
   });
+});
+
+//profile
+// Image Upload
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => cb(null, 'uploads/'),
+  filename: (req, file, cb) => cb(null, `${Date.now()}-${file.originalname}`)
+});
+const upload = multer({ storage });
+app.use('/uploads', express.static('uploads'));
+
+// Models
+const userSchema = new mongoose.Schema({
+  firstName: String,
+  lastName: String,
+  username: String,
+  email: String,
+  phone: String,
+  password: String,
+  gender: String,
+  language: String,
+  address: String,
+  postcode: String,
+  country: String,
+  payment: String,
+  dob: Date,
+  profileImage: String,
+  provider: String,
+  resetToken: String,
+  tokenExpiry: Date,
+});
+module.exports = mongoose.models.User || mongoose.model('User', updatedUserSchema);
+
+app.get('/profile/:id', async (req, res) => {
+  try {
+    const user = await User.findById(req.params.id).select('-password');
+    if (!user) return res.status(404).json({ message: 'User not found' });
+
+    const userId = `${user.username}${user.lastName}`;
+    res.json({ ...user._doc, userId });
+  } catch (err) {
+    res.status(500).json({ message: 'Failed to fetch profile' });
+  }
+});
+
+app.put('/profile/update/:id', upload.single('profileImage'), async (req, res) => {
+  try {
+    const updates = req.body;
+    if (req.file) {
+      updates.profileImage = `/uploads/${req.file.filename}`;
+    }
+
+    const user = await User.findByIdAndUpdate(req.params.id, updates, { new: true });
+    if (!user) return res.status(404).json({ message: 'User not found' });
+
+    res.json({ message: 'Profile updated successfully', user });
+  } catch (err) {
+    res.status(500).json({ message: 'Failed to update profile' });
+  }
 });
 
 // Start server
