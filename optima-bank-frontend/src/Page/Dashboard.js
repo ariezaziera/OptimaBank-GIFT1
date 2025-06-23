@@ -1,4 +1,6 @@
+// src/Page/Dashboard.js
 import React, { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
 
 const Dashboard = () => {
   const [user, setUser] = useState(null);
@@ -30,20 +32,26 @@ const Dashboard = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-r from-blue-200 to-white text-white px-6 py-12">
-      <div className="max-w-4xl mx-auto bg-white/10 backdrop-blur-md p-8 rounded-xl shadow-md">
-        <h1 className="text-4xl font-bold mb-2 text-blue-950">
-          👋 Hello{user ? `, ${user.firstName}` : ''}!
-        </h1>
-        <p className="text-lg mb-6 text-blue-950">Welcome to Optima Bank Dashboard</p>
+    <div className="min-h-screen bg-gradient-to-r from-blue-200 to-white text-blue-950 px-6 py-6">
+      {/* Header */}
+      <header className="flex justify-between items-center py-4 border-b border-blue-300">
+        <h1 className="text-2xl font-bold">Optima Bank</h1>
+        <nav className="flex gap-4">
+          <Link to="/Dashboard" className="hover:underline">Home</Link>
+          <Link to="/Profile" className="hover:underline">Profile</Link>
+          <button onClick={handleLogout} className="bg-red-500 hover:bg-red-600 text-white font-semibold px-4 py-1 rounded-md">
+            Logout
+          </button>
+        </nav>
+      </header>
 
-        <button
-          onClick={handleLogout}
-          className="bg-red-500 hover:bg-red-600 text-white font-semibold px-6 py-2 rounded-lg transition-all"
-        >
-          Logout
-        </button>
-      </div>
+      {/* Welcome Section */}
+      <main className="max-w-4xl mx-auto mt-12 bg-white/10 backdrop-blur-md p-8 rounded-xl shadow-md">
+        <h2 className="text-3xl font-bold mb-2">
+          👋 Hello{user ? `, ${user.firstName}` : ''}!
+        </h2>
+        <p className="text-lg mb-6">Welcome to Optima Bank Dashboard</p>
+      </main>
     </div>
   );
 };
