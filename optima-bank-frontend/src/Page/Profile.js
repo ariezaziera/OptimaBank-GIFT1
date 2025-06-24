@@ -88,9 +88,9 @@ const Profile = () => {
   const handleSave = async () => {
     try {
       const updatedData = { ...formData };
-      const dob = new Date(`${formData.birthYear}-${formData.birthMonth}-${formData.birthDay}`);
-      updatedData.dob = dob;
-
+      if (formData.birthYear && formData.birthMonth && formData.birthDay) {
+        updatedData.dob = new Date(`${formData.birthYear}-${formData.birthMonth}-${formData.birthDay}`);
+      }
       const form = new FormData();
       for (const key in updatedData) {
         if (key !== 'profileImage') {
@@ -194,7 +194,7 @@ const Profile = () => {
         {/* Username */}
         <div>
           <label htmlFor="username" className="block text-white mb-1 ml-5 font-semibold">Username</label>
-          <input id="username" name="username" placeholder="Username" onChange={handleChange} value={formData.username}
+          <input id="username" name="username" placeholder="Username" onChange={handleChange} value={formData.username} autoComplete="off"
             className="w-full p-3 pl-5 rounded-3xl border-2 border-white bg-transparent text-white placeholder-white outline-none focus:ring-2 focus:ring-white"
           />
         </div>
@@ -230,7 +230,7 @@ const Profile = () => {
         {/* Password */}
         <div>
           <label htmlFor="password" className="block text-white mb-1 ml-5 font-semibold">Password</label>
-          <input id="password" name="password" placeholder="Password" type="password" onChange={handleChange} value={formData.password}
+          <input id="password" name="password" placeholder="Password" type="password" onChange={handleChange} value={formData.password} autoComplete="off"
             className="w-full p-3 pl-5 rounded-3xl border-2 border-white bg-transparent text-white placeholder-white outline-none focus:ring-2 focus:ring-white"
           />
         </div>
