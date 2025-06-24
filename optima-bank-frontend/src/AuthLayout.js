@@ -11,7 +11,7 @@ const AuthLayout = ({ children, bgImage }) => {
       style={{ backgroundImage: bgImage ? `url(${bgImage})` : defaultBg }}
     >
       <div
-        className="ml-auto mr-0 p-8 rounded-3xl shadow-lg w-96 backdrop-blur-md"
+        className="p-8 rounded-3xl shadow-lg w-full mx-20 backdrop-blur-md"
         style={{ backgroundColor: 'rgba(3, 49, 66, 0.4)' }}
       >
         {children}
