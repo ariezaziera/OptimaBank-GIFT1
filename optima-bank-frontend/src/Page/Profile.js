@@ -98,7 +98,9 @@ const Profile = () => {
         }
       }
 
-      if (formData.profileImage) {
+      console.log("formData.profileImage =", formData.profileImage);
+
+      if (formData.profileImage instanceof File) {
         form.append('profileImage', formData.profileImage);
       }
 
@@ -144,8 +146,9 @@ const Profile = () => {
             <img
               src={
                 imagePreview ||
-                formData.profileImage || // ✅ Google profile image if available
-                "/default-profile.png"
+                (formData.profileImage?.startsWith('/uploads')
+                  ? `http://localhost:5000${formData.profileImage}`
+                  : formData.profileImage) || "/default-profile.png"
               }
               alt="User"
               className="w-24 h-24 rounded-full object-cover mt-2"

@@ -210,16 +210,22 @@ app.get('/profile/:id', async (req, res) => {
 
 app.put('/profile/update/:id', upload.single('profileImage'), async (req, res) => {
   try {
+    console.log("REQ FILE:", req.file);   // ✅ Important
+    console.log("REQ BODY:", req.body);   // ✅ Check all incoming fields
+
     const updates = req.body;
+
     if (req.file) {
       updates.profileImage = `/uploads/${req.file.filename}`;
     }
 
     const user = await User.findByIdAndUpdate(req.params.id, updates, { new: true });
+
     if (!user) return res.status(404).json({ message: 'User not found' });
 
     res.json({ message: 'Profile updated successfully', user });
   } catch (err) {
+    console.error('❌ Update error:', err);  // ✅ Log full error
     res.status(500).json({ message: 'Failed to update profile' });
   }
 });
