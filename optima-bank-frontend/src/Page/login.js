@@ -28,11 +28,11 @@ export default function LoginPage() {
       const data = await res.json();
 
       if (res.ok) {
-        alert('Login successful!');
+        alert('Login successful!'); //for successful login
         navigate('/dashboard');
         console.log(data);
       } else {
-        alert(data.message || 'Login failed.');
+        alert(data.message || 'Login failed.'); // for unsuccessful login
       }
     } catch (err) {
       console.error(err);
