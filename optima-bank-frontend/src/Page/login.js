@@ -31,7 +31,7 @@ export default function LoginPage() {
       const data = await res.json();
 
       if (res.ok) {
-        alert('Login successful!');
+        alert('Login successful!'); //for successful login
         navigate('/dashboard');
         console.log(data);
       } else {
