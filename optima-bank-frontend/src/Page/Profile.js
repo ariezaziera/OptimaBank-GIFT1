@@ -37,13 +37,13 @@ const Profile = () => {
   
         if (data) {
           setFormData(prev => ({
-            ...prev,
-            ...data,
-            birthMonth: new Date(data.dob).getMonth() + 1,
-            birthDay: new Date(data.dob).getDate(),
-            birthYear: new Date(data.dob).getFullYear()
-          }));
-          setUserId(`${data.username}${data.lastName}`);
+          ...prev,
+          ...data,
+          birthMonth: new Date(data.dob).getMonth() + 1,
+          birthDay: new Date(data.dob).getDate(),
+          birthYear: new Date(data.dob).getFullYear()
+        }));
+        setUserId(savedUser._id); // ✅ Correct MongoDB ObjectId
         }
       } catch (err) {
         console.error("Failed to load profile:", err);
