@@ -1,6 +1,8 @@
 // src/Login.js
 import React, { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom'; // ✅ Import Link juga!
+import { useNavigate, Link } from 'react-router-dom';
+import { FcGoogle } from 'react-icons/fc';
+import Navbar from '../Navbar';
 
 export default function LoginPage() {
   const navigate = useNavigate();
@@ -22,13 +24,14 @@ export default function LoginPage() {
         headers: {
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify(formData)
+        body: JSON.stringify(formData),
+        credentials: 'include',
       });
 
       const data = await res.json();
 
       if (res.ok) {
-        alert('Login successful!'); //for successful login
+        alert('Login successful!');
         navigate('/dashboard');
         console.log(data);
       } else {
@@ -41,35 +44,64 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-cover bg-center" style={{ backgroundImage: "url('Background.jpeg')" }}>
-      <div className="bg-white bg-opacity-20 p-10 rounded-2xl shadow-lg max-w-md w-full backdrop-blur-md">
-        <h2 className="text-white text-3xl font-bold text-center mb-6">Login</h2>
-        <form className="space-y-4" onSubmit={handleSubmit}>
-          <input
-            type="email"
-            name="email"
-            placeholder="Email"
-            className="w-full p-3 rounded-lg outline-none"
-            onChange={handleChange}
-            value={formData.email}
-            required
-          />
-          <input
-            type="password"
-            name="password"
-            placeholder="Password"
-            className="w-full p-3 rounded-lg outline-none"
-            onChange={handleChange}
-            value={formData.password}
-            required
-          />
-          <button type="submit" className="w-full bg-white text-black font-bold py-2 rounded-full">
-            Login
-          </button>
-        </form>
-        <p className="text-center text-white mt-4">
-          Don't have an account? <Link to="/signup" className="underline text-white">Signup</Link>
-        </p>
+    <div
+      className="min-h-screen flex items-center justify-center bg-cover bg-center"
+      style={{ backgroundImage: "url('/bg.png')" }}
+    >
+
+    <Navbar />  
+    
+      <div
+        className="ml-auto mr-36 p-8 rounded-3xl shadow-lg w-96"
+        style={{ backgroundColor: 'rgba(3, 49, 66, 0.6)' }}
+      >
+      <h2 className="text-white text-3xl font-bold text-center mb-6">Login</h2>
+      <form className="space-y-4" onSubmit={handleSubmit}>
+        <input
+          type="email"
+          name="email"
+          placeholder="Email"
+          className="w-full p-3 pl-5 rounded-3xl border-2 border-white bg-transparent text-white placeholder-white outline-none focus:ring-2 focus:ring-white"
+          onChange={handleChange}
+          value={formData.email}
+          required
+        />
+        <input
+          type="password"
+          name="password"
+          placeholder="Password"
+          className="w-full p-3 pl-5 rounded-3xl border-2 border-white bg-transparent text-white placeholder-white outline-none focus:ring-2 focus:ring-white"
+          onChange={handleChange}
+          value={formData.password}
+          required
+        />
+        <div className="text-center">
+          <Link to="/forgot-password" className="text-sm underline text-white hover:text-gray-200">
+            Forgot Password?
+          </Link>
+        </div>
+        <button type="submit" className="w-1/2 mx-auto block bg-white text-black font-bold py-2 rounded-full">
+          Login
+        </button>
+      </form>
+
+      <div className="mt-4 flex flex-col gap-3">
+      <a href="http://localhost:5000/auth/google">
+        <button className="w-3/4 mx-auto bg-white text-black font-bold py-2 rounded-full flex items-center justify-center gap-2">
+          <FcGoogle size={20} />
+          Continue with Google
+        </button>
+      </a>
+
+        
+      </div>
+
+      <p className="text-center text-white mt-4">
+        Don’t have an account?{' '}
+        <Link to="/signup" className="underline text-white hover:text-gray-200">
+          Signup
+        </Link>
+      </p>
       </div>
     </div>
   );
