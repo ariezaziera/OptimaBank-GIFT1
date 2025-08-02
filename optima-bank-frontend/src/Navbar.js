@@ -1,3 +1,4 @@
+import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 
 export default function Navbar({ user, handleLogout }) {
@@ -10,7 +11,7 @@ export default function Navbar({ user, handleLogout }) {
     }`;
 
   return (
-    <nav className="absolute top-0 left-0 w-full flex items-center justify-between px-6 py-4 text-black z-10">
+    <nav className="absolute top-0 left-0 w-full flex items-center justify-between px-6 py-4 text-black z-10 bg-white shadow-md">
       {/* Logo */}
       <Link to="/" className="text-xl font-bold flex items-center">
         <img src="/logo.png" alt="Logo" className="h-8" />
@@ -20,14 +21,16 @@ export default function Navbar({ user, handleLogout }) {
       <div className="flex items-center gap-4 mr-10">
         {user ? (
           <>
-            {/* Authenticated user: Home first */}
             <Link to="/dashboard" className={linkClass('/dashboard')}>Home</Link>
-            <Link to="/vouchers" className={linkClass('/vouchers')}>Vouchers</Link>
+            <Link to="/voucher" className={linkClass('/voucher')}>Vouchers</Link>
             <Link to="/rewards" className={linkClass('/rewards')}>Rewards</Link>
             <Link to="/cart" className={linkClass('/cart')}>Cart</Link>
             <Link to="/history" className={linkClass('/history')}>History</Link>
             <Link to="/about" className={linkClass('/about')}>About Us</Link>
             <Link to="/profile" className={linkClass('/profile')}>Profile</Link>
+
+            <span className="text-gray-700 font-medium">Hi, {user.username}</span>
+
             <button
               onClick={handleLogout}
               className="bg-red-500 hover:bg-red-600 text-white font-semibold px-4 py-1 rounded-md"
@@ -37,7 +40,6 @@ export default function Navbar({ user, handleLogout }) {
           </>
         ) : (
           <>
-            {/* Guest: About Us first */}
             <Link to="/about" className={linkClass('/about')}>About Us</Link>
             <Link
               to="/signup"

@@ -14,6 +14,7 @@ const Dashboard = () => {
         _id: params.get('_id'),
         firstName: params.get('firstName'),
         lastName: params.get('lastName'),
+        username: params.get('username'),
         email,
         profileImage: params.get('profileImage'),
       };
@@ -27,9 +28,10 @@ const Dashboard = () => {
   }, []);
 
   useEffect(() => {
-    const savedUser = JSON.parse(localStorage.getItem('user'));
-    if (savedUser) setUser(savedUser);
-  }, []);
+  const savedUser = JSON.parse(localStorage.getItem('user'));
+  console.log('Saved user:', savedUser); // 👈
+  if (savedUser) setUser(savedUser);
+}, []);
 
   const handleLogout = async () => {
     const confirmLogout = window.confirm("Are you sure you want to logout?");
@@ -59,7 +61,7 @@ const Dashboard = () => {
       {/* Welcome Section */}
       <main className="max-w-4xl mx-auto mt-12 bg-white/10 backdrop-blur-md p-8 rounded-xl shadow-md">
         <h2 className="text-3xl font-bold mb-2">
-          👋 Hello{user ? `, ${user.firstName}` : ''}!
+          👋 Hello{user ? `, ${user.username}` : ''}!
         </h2>
         <p className="text-lg mb-6">Welcome to Optima Bank Dashboard</p>
       </main>
