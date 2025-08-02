@@ -47,48 +47,69 @@ mongoose.connect(process.env.MONGO_URI)
 
 // Signup route
 app.post('/signup', async (req, res) => {
-  const { firstName, lastName, dob, phone, email, password } = req.body;
+  const { firstName, lastName, dob, phone, email, password, username } = req.body;
+
+  const usernameRegex = /^[a-zA-Z0-9]{6,}$/;
+  if (!usernameRegex.test(username)) {
+    return res.status(400).json({ message: 'Username mesti huruf/nombor minimum 6 aksara' });
+  }
 
   try {
-    const userExist = await User.findOne({ email });
+    const userExist = await User.findOne({ $or: [{ email }, { username }] });
     if (userExist) {
-      return res.status(400).json({ message: 'User already exists' });
+      return res.status(400).json({ message: 'Email atau username telah digunakan.' });
     }
 
     const hashedPassword = await bcrypt.hash(password, saltRounds);
-    const newUser = new User({ 
-      firstName, 
-      lastName, 
-      dob, 
-      phone, 
-      email, 
-      password: hashedPassword, 
-      provider: 'local', 
+    const newUser = new User({
+      firstName,
+      lastName,
+      username,
+      dob,
+      phone,
+      email,
+      password: hashedPassword,
+      provider: 'local'
     });
+
     await newUser.save();
-    res.status(201).json({ message: 'User registered successfully' });
+    res.status(201).json({ message: 'Pendaftaran berjaya!' });
   } catch (err) {
-    res.status(500).json({ message: 'Server error' });
+    console.error('Signup error:', err);
+    res.status(500).json({ message: 'Ralat server semasa signup.' });
   }
 });
 
 // Login route
 app.post('/login', async (req, res) => {
-  const { email, password } = req.body;
+  const { username, password } = req.body;
 
   try {
-    const user = await User.findOne({ email });
-    if (!user) return res.status(400).json({ message: 'User not found' });
+    // Cari berdasarkan username SAHAJA
+    const user = await User.findOne({ username });
+
+    if (!user) return res.status(400).json({ message: 'Username tidak dijumpai.' });
 
     const isMatch = await bcrypt.compare(password, user.password);
-    if (!isMatch) return res.status(400).json({ message: 'Invalid password' });
+    if (!isMatch) return res.status(400).json({ message: 'Kata laluan salah.' });
 
-    res.status(200).json({ message: 'Login successful', user });
+    const userData = {
+      _id: user._id,
+      username: user.username,
+      firstName: user.firstName,
+      lastName: user.lastName,
+      email: user.email,
+      profileImage: user.profileImage || ''
+    };
+
+    // Jika berjaya
+    res.status(200).json({ message: 'Login berjaya', user });
   } catch (err) {
-    console.error('Login error:', err); // ✅ Log exact error
-    res.status(500).json({ message: 'Server error' });
+    console.error('Login error:', err);
+    res.status(500).json({ message: 'Ralat semasa login.' });
   }
 });
+
 
 // Forgot password route
 app.post('/forgot-password', async (req, res) => {
