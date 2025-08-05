@@ -53,7 +53,7 @@ const Profile = () => {
     fetchProfile();
   }, []);  
 
-  // ✅ Logout function
+  //  Logout function
   const handleLogout = async () => {
     const confirmLogout = window.confirm("Are you sure you want to logout?");
     if (!confirmLogout) return;
@@ -155,7 +155,11 @@ const Profile = () => {
             />
           </div>
           <div>
-            <p className="text-gray-700 font-semibold">User ID: {userId}</p>
+            <p className="text-black-700 font-semibold">User ID: {userId}</p>
+        </div>
+
+        <div>
+            {user && (<p className="text-lg font-semibold mt-4">Points: <span className="text-green-700">{user.points}</span></p> )}
           </div>
         </div>
 

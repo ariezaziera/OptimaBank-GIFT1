@@ -17,21 +17,19 @@ const Dashboard = () => {
         username: params.get('username'),
         email,
         profileImage: params.get('profileImage'),
+        points: parseInt(params.get('points')) || 0 // Ambil points kalau guna Google login
       };
       localStorage.setItem('user', JSON.stringify(user));
       setUser(user);
       alert("Login successful!");
-
-      // Optional: Clean up query string
       window.history.replaceState({}, '', window.location.pathname);
     }
   }, []);
 
   useEffect(() => {
-  const savedUser = JSON.parse(localStorage.getItem('user'));
-  console.log('Saved user:', savedUser); // 👈
-  if (savedUser) setUser(savedUser);
-}, []);
+    const savedUser = JSON.parse(localStorage.getItem('user'));
+    if (savedUser) setUser(savedUser);
+  }, []);
 
   const handleLogout = async () => {
     const confirmLogout = window.confirm("Are you sure you want to logout?");
@@ -56,14 +54,17 @@ const Dashboard = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-r from-blue-200 to-white text-blue-950 px-6 py-6">
-        <Navbar user={user} handleLogout={handleLogout} />
-
-      {/* Welcome Section */}
+      <Navbar user={user} handleLogout={handleLogout} />
       <main className="max-w-4xl mx-auto mt-12 bg-white/10 backdrop-blur-md p-8 rounded-xl shadow-md">
         <h2 className="text-3xl font-bold mb-2">
           👋 Hello{user ? `, ${user.username}` : ''}!
         </h2>
-        <p className="text-lg mb-6">Welcome to Optima Bank Dashboard</p>
+        <p className="text-lg mb-2">Welcome to Optima Bank Dashboard</p>
+
+        {user && (
+          <p className="text-lg font-semibold mt-4">Points anda: <span className="text-green-700">{user.points}</span>
+          </p>
+        )}
       </main>
     </div>
   );

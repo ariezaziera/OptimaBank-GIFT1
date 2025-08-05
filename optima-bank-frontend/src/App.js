@@ -8,6 +8,7 @@ import ResetPassword from './Page/ResetPassword';
 import Profile from './Page/Profile';
 import Voucher from './Page/Voucher';
 import Cart from './Page/Cart';
+import History from './Page/History';
 import './App.css'; // optional: global styling
 
 function App() {
@@ -34,10 +35,8 @@ function App() {
         <Route path="/reset-password/:token" element={<ResetPassword />} />
         <Route path="/profile" element={<Profile />} />
         <Route path="/voucher" element={<Voucher handleAddToCart={handleAddToCart} />} />
-        <Route path="/cart" element={ <Cart cartItems={cartItems} handleRemoveFromCart={handleRemoveFromCart} />
-        }
-        />
-      </Routes>
+        <Route path="/cart" element={ <Cart cartItems={cartItems} handleRemoveFromCart={handleRemoveFromCart} />}/>
+        <Route path="/history" element={<History />} /></Routes>
     </Router>
   );
 }
