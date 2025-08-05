@@ -10,7 +10,7 @@ const userSchema = new mongoose.Schema({
   password: {
     type: String,
     required: function () {
-      return this.provider === 'local'; // ✅ Only required for email/password users
+      return this.provider === 'local'; //  Only required for email/password users
     }
   },
   provider: {

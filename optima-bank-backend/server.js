@@ -69,7 +69,9 @@ app.post('/signup', async (req, res) => {
       phone,
       email,
       password: hashedPassword,
-      provider: 'local'
+      provider: 'local',
+      points: 500, //  Tambah points semasa signup
+      rewards: []  //  Sediakan rewards array kosong
     });
 
     await newUser.save();
@@ -246,10 +248,62 @@ app.put('/profile/update/:id', upload.single('profileImage'), async (req, res) =
 
     res.json({ message: 'Profile updated successfully', user });
   } catch (err) {
-    console.error('❌ Update error:', err);  // ✅ Log full error
+    console.error('❌ Update error:', err);  //  Log full error
     res.status(500).json({ message: 'Failed to update profile' });
   }
 });
+
+//voucher redeem
+app.get('/redeemed/:id', async (req, res) => {
+  try {
+    const user = await User.findById(req.params.id);
+    res.json(user.rewards || []);
+  } catch (err) {
+    res.status(500).json({ message: 'Fail to redeem' });
+  }
+});
+
+// redeem/reward
+
+app.post('/redeem', async (req, res) => {
+  const { userId, voucher } = req.body;
+
+  try {
+    const user = await User.findById(userId);
+    if (!user) return res.status(404).json({ message: 'User tidak dijumpai' });
+
+    const quantity = Number(voucher.quantity) || 1;
+    const totalPrice = Number(voucher.price); // Sudah dikira di frontend
+
+    if (isNaN(totalPrice) || totalPrice <= 0) {
+      return res.status(400).json({ message: 'Harga tidak sah' });
+    }
+
+    if (user.points < totalPrice) {
+      return res.status(400).json({ message: 'Point tidak mencukupi untuk menebus' });
+    }
+
+    user.points -= totalPrice;
+
+    for (let i = 0; i < quantity; i++) {
+      user.rewards.push({
+        id: voucher.id,
+        name: voucher.name,
+        image: voucher.image,
+        price: voucher.price / quantity,
+        redeemedAt: new Date()
+      });
+    }
+
+    await user.save();
+
+    res.json({ message: 'Tebus berjaya', points: user.points });
+  } catch (err) {
+    console.error('Redeem error:', err);
+    res.status(500).json({ message: 'Ralat semasa redeem' });
+  }
+});
+
 
 // Start server
 const PORT = process.env.PORT || 5000;

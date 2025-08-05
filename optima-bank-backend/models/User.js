@@ -10,7 +10,7 @@ const userSchema = new mongoose.Schema({
   password: {
     type: String,
     required: function () {
-      return this.provider === 'local'; // ✅ Only required for email/password users
+      return this.provider === 'local'; //  Only required for email/password users
     }
   },
   provider: {
@@ -20,6 +20,19 @@ const userSchema = new mongoose.Schema({
   resetToken: String,
   tokenExpiry: Date,
   profileImage: String,
+
+  points: {
+    type: Number,
+    default: 500, // User baru dapat 500 points
+  },
+  rewards: [
+    {
+      id: String,
+      name: String,
+      image: String,
+      redeemedAt: Date
+    }
+  ]
 });
 
 module.exports = mongoose.model('User', userSchema);
