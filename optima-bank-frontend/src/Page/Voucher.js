@@ -20,39 +20,39 @@ const Voucher = () => {
     const sampleVouchers = [
       {
         id: "1",
-        name: "RM10 Off Shirt",
-        price: 20,
+        name: "RM15 Off Shirt",
+        price: 300,
         image: '/1.png',
-        category: 'Pakaian',
-        description: 'Diskaun RM10 untuk pembelian baju terpilih.',
-        terms: 'Sah sehingga 30 Disember. Tertakluk pada terma & syarat.'
+        category: 'Clothing',
+        description: 'Enjoy RM10 discount on selected clothing.',
+        terms: 'Valid through 30 December. T&Cs apply.'
       },
       {
         id: "2",
         name: "Free Fried Chicken",
-        price: 18,
+        price: 200,
         image: '/2.png',
-        category: 'Makanan',
-        description: 'Dapatkan ayam goreng percuma di restoran terpilih.',
-        terms: 'Tebus di outlet participating. Sah 1 kali guna.'
+        category: 'Food',
+        description: 'Enjoy a free fried chicken at selected restaurants.',
+        terms: 'Redeemable at participating outlets. Valid for single use only.'
       },
       {
         id: "3",
         name: "20% Off Handbag",
-        price: 4,
+        price: 250,
         image: '/3.png',
         category: 'Handbag',
-        description: 'Diskaun 20% untuk semua beg tangan jenama X.',
-        terms: 'Sah di butik X. Tidak digabungkan dengan promosi lain.'
+        description: 'Get 20% off all Brand X handbags.',
+        terms: 'Valid at Brand X boutiques. Not valid with other promotions.'
       },
       {
         id: "4",
         name: "RM20 Off Shoes",
-        price: 80,
+        price: 180,
         image: '/4.png',
         category: 'Shoes',
-        description: 'Diskaun RM20 untuk kasut sukan terpilih.',
-        terms: 'Tertakluk pada saiz & stok.'
+        description: 'Enjoy RM20 discount on selected sports shoes.',
+        terms: 'Available while sizes and stocks last.'
       },
     ];
     setVouchers(sampleVouchers);
@@ -72,12 +72,12 @@ const Voucher = () => {
     const cart = JSON.parse(localStorage.getItem('cart')) || [];
     const exists = cart.find(item => item.id === voucher.id);
     if (exists) {
-      alert('Voucher ini sudah ada dalam cart.');
+      alert('This voucher is already in the cart.');
       return;
     }
     cart.push({ ...voucher, quantity: 1 });
     localStorage.setItem('cart', JSON.stringify(cart));
-    alert('Voucher berjaya ditambah ke cart!');
+    alert('Voucher was added to cart!');
     setSelectedVoucher(null);
   };
 
@@ -93,7 +93,7 @@ const Voucher = () => {
       const data = await res.json();
 
       if (res.ok) {
-        alert('Tebus berjaya!');
+        alert('Redeem Successfull!');
         const updatedUser = { ...user, points: data.points };
         setUser(updatedUser);
         localStorage.setItem('user', JSON.stringify(updatedUser));
@@ -103,17 +103,17 @@ const Voucher = () => {
       }
     } catch (err) {
       console.error(err);
-      alert("Ralat semasa tebus voucher.");
+      alert("Error while redeeming voucher.");
     }
   };
 
-  const categories = ['All', 'Pakaian', 'Makanan', 'Handbag', 'Shoes'];
+  const categories = ['All', 'Clothing', 'Food', 'Handbag', 'Shoes'];
 
   return (
     <>
       <Navbar user={user} />
       <div className="max-w-6xl mx-auto p-4 mt-24">
-        <center><h2 className="text-3xl font-bold mb-6">Senarai Voucher</h2></center>
+        <center><h2 className="text-3xl font-bold mb-6">Voucher List</h2></center>
 
         <div className="flex flex-wrap justify-center gap-3 mb-8">
           {categories.map((category) => (
@@ -138,11 +138,11 @@ const Voucher = () => {
                 src={voucher.image}
                 alt={voucher.name}
                 onClick={() => setSelectedVoucher(voucher)}
-                className="w-full h-40 object-cover rounded-xl mb-4 cursor-pointer"
+                className="w-full aspect-square object-cover rounded-xl mb-4 cursor-pointer"
               />
               <h3 className="text-lg font-semibold">{voucher.name}</h3>
-              <p className="text-sm text-gray-500">Kategori: {voucher.category}</p>
-              <p className="text-gray-600 mb-2">Harga: {voucher.price} pts</p>
+              <p className="text-sm text-gray-500">Category: {voucher.category}</p>
+              <p className="text-gray-600 mb-2">Price: {voucher.price} pts</p>
               <button
                 onClick={() => setSelectedVoucher(voucher)}
                 className="bg-blue-600 text-white px-4 py-1 rounded hover:bg-blue-700"
@@ -167,18 +167,18 @@ const Voucher = () => {
             <img
               src={selectedVoucher.image}
               alt={selectedVoucher.name}
-              className="w-full h-48 object-cover rounded-lg mb-4"
+              className="w-full aspect-square object-cover rounded-lg mb-4"
             />
             <h2 className="text-2xl font-bold mb-2">{selectedVoucher.name}</h2>
-            <p className="text-gray-500 mb-1">Kategori: {selectedVoucher.category}</p>
-            <p className="mb-2 font-medium">Harga: {selectedVoucher.price} pts</p>
+            <p className="text-gray-500 mb-1">Category: {selectedVoucher.category}</p>
+            <p className="mb-2 font-medium">Price: {selectedVoucher.price} pts</p>
             <p className="text-sm mb-2"><strong>Description:</strong> {selectedVoucher.description}</p>
-            <p className="text-sm mb-4"><strong>Terma & Syarat:</strong> {selectedVoucher.terms}</p>
+            <p className="text-sm mb-4"><strong>Terms & Conditions:</strong> {selectedVoucher.terms}</p>
             <button
               onClick={handleRedeem}
               className="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700 w-full mb-2"
             >
-              Tebus
+              Claim
             </button>
             <button
               onClick={() => addToCart(selectedVoucher)}
