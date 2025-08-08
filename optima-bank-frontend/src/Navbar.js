@@ -26,7 +26,7 @@ export default function Navbar({ user, handleLogout }) {
             <Link to="/rewards" className={linkClass('/rewards')}>Rewards</Link>
             <Link to="/cart" className={linkClass('/cart')}>Cart</Link>
             <Link to="/history" className={linkClass('/history')}>History</Link>
-            <Link to="/about us" className={linkClass('/about us')}>About Us</Link>
+            <Link to="/about-us" className={linkClass('/about-us')}>About Us</Link>
             <Link to="/profile" className={linkClass('/profile')}>Profile</Link>
 
             <span className="text-gray-700 font-medium">Hi, {user.username}</span>
@@ -40,7 +40,7 @@ export default function Navbar({ user, handleLogout }) {
           </>
         ) : (
           <>
-            <Link to="/about" className={linkClass('/about')}>About Us</Link>
+            <Link to="/about-us" className={linkClass('/about-us')}>About Us</Link>
             <Link
               to="/signup"
               className={`bg-cyan-950 text-white font-semibold px-4 py-1 rounded-md hover:bg-gray-800 ${

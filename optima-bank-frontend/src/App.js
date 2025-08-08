@@ -39,6 +39,7 @@ function App() {
         <Route path="/cart" element={ <Cart cartItems={cartItems} handleRemoveFromCart={handleRemoveFromCart} />}/>
         <Route path="/history" element={<History />} /> 
         <Route path="/about-us" element={<AboutUs />} />
+      </Routes> {/* ✅ Close this tag */}
     </Router>
   );
 }
