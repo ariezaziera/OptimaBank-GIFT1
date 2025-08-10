@@ -49,7 +49,7 @@ export default function Cart() {
       const data = await res.json();
 
       if (res.ok) {
-        alert("Tebus berjaya!");
+        alert("Redeem Successull!");
         const updatedUser = { ...user, points: data.points };
         localStorage.setItem('user', JSON.stringify(updatedUser));
         setUser(updatedUser);
@@ -62,7 +62,7 @@ export default function Cart() {
       }
     } catch (err) {
       console.error(err);
-      alert("Ralat semasa menebus");
+      alert("Error while redeeming voucher.");
     }
   };
 
@@ -70,10 +70,10 @@ export default function Cart() {
     <>
       <Navbar user={user} />
       <div className="pt-24 px-6 max-w-5xl mx-auto">
-        <h2 className="text-3xl font-semibold mb-6 text-center">Cart Anda</h2>
+        <h2 className="text-3xl font-semibold mb-6 text-center">Your Cart</h2>
 
         {cartItems.length === 0 ? (
-          <p className="text-gray-600 text-center">Cart masih kosong. Sila tebus voucher dahulu.</p>
+          <p className="text-gray-600 text-center">Cart is still empty. Please redeem a voucher first.</p>
         ) : (
           <div className="space-y-4">
             {cartItems.map((item, index) => (
@@ -82,7 +82,7 @@ export default function Cart() {
                   <img src={item.image} alt={item.name} className="w-20 h-20 object-cover rounded-md" />
                   <div>
                     <h3 className="text-lg font-semibold">{item.name}</h3>
-                    <p className="text-sm text-gray-500">Kategori: {item.category}</p>
+                    <p className="text-sm text-gray-500">Category: {item.category}</p>
                     <p className="text-sm font-medium">Points per unit: {item.price}</p>
                     <div className="mt-2">
                       <label className="mr-2">Quantity:</label>
@@ -102,7 +102,7 @@ export default function Cart() {
                     onClick={() => handleRedeem(item)}
                     className="bg-green-600 text-white px-4 py-1 rounded hover:bg-green-700"
                   >
-                    Tebus
+                    Redeem
                   </button>
                   <button
                     onClick={() => handleRemoveFromCart(item.id)}

@@ -1,13 +1,26 @@
 // src/Page/AboutUs.js
-import React from 'react';
+import React, {useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
+import Navbar from '../Navbar';
 
 export default function AboutUs() {
+
+  const [user, setUser] = useState(null);
+
+  useEffect(() => {
+      const storedUser = localStorage.getItem("user");
+      if (storedUser) {
+        setUser(JSON.parse(storedUser));
+      }
+    }, []);
+
   return (
     <div
       className="min-h-screen bg-cover bg-center bg-no-repeat py-16 px-4"
       style={{ backgroundImage: `url('/bg-bank.png')` }} // Make sure this image exists in public folder
     >
+      
+      <Navbar user={user} />
 
       <motion.div
         className="relative max-w-5xl mx-auto px-6 py-16 z-10"
@@ -17,12 +30,12 @@ export default function AboutUs() {
       >
         <div className="bg-white bg-opacity-90 backdrop-blur-md p-10 rounded-2xl shadow-2xl">
           <motion.h1
-            className="text-5xl font-bold text-center text-blue-800 mb-4"
+            className="text-5xl font-bold text-center text-[#183444] mb-4"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.3 }}
           >
-            About Optima Bank
+            About Us
           </motion.h1>
           <motion.p
             className="text-center text-gray-600 text-xl mb-10 italic"
@@ -30,7 +43,7 @@ export default function AboutUs() {
             animate={{ opacity: 1 }}
             transition={{ delay: 0.5 }}
           >
-            "Empowering your financial future — smart, simple, secure."
+            Empowering your financial future — smart, simple, secure.
           </motion.p>
 
           {[
@@ -69,26 +82,34 @@ export default function AboutUs() {
                 'Secure and encrypted platform – your data is safe with us.'
               ]
             }
-          ].map((section, index) => (
-            <motion.section
-              key={index}
-              className="mb-10"
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: index * 0.2 }}
-            >
-              <h2 className="text-2xl font-semibold text-blue-700 mb-2">{section.title}</h2>
-              {section.content && (
-                <p className="text-gray-700 text-justify">{section.content}</p>
-              )}
-              {section.list && (
-                <ul className="list-disc list-inside text-gray-700">
-                  {section.list.map((item, i) => (
-                    <li key={i}>{item}</li>
-                  ))}
-                </ul>
-              )}
+          ].map((section, index, array) => (
+  <motion.section
+    key={index}
+    className={`${index === array.length - 1 ? '' : 'mb-10'}`}
+    initial={{ opacity: 0, y: 20 }}
+    whileInView={{ opacity: 1, y: 0 }}
+    viewport={{ once: true }}
+    transition={{ delay: index * 0.2 }}
+  >
+    <h2
+      className={`text-2xl font-semibold text-[#668032] text-center ${
+        index === array.length - 1 ? '' : 'mb-2'
+      }`}
+    >
+      {section.title}
+    </h2>
+
+    {section.content && (
+      <p className="text-gray-700 text-center">{section.content}</p>
+    )}
+
+    {section.list && (
+      <ul className="list-none list-inside text-center text-gray-700">
+        {section.list.map((item, i) => (
+          <li key={i}>{item}</li>
+        ))}
+      </ul>
+    )}
             </motion.section>
           ))}
         </div>
