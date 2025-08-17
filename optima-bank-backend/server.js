@@ -20,7 +20,6 @@ const bcrypt = require('bcrypt');
 const saltRounds = 10;
 
 
-
 // Middleware
 app.use(cors({
   origin: 'http://localhost:3000',
