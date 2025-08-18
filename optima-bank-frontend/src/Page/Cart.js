@@ -30,7 +30,7 @@ export default function Cart() {
   };
 
   const handleRedeem = async (item) => {
-    if (!user) return alert("Sila login terlebih dahulu");
+    if (!user) return alert("Please login first");
 
     try {
       const res = await fetch('http://localhost:5000/redeem', {

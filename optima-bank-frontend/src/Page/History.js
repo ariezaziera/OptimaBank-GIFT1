@@ -31,7 +31,7 @@ export default function History() {
         <h2 className="text-3xl font-bold mb-6 text-center">Redeem History</h2>
 
         {redeemedVouchers.length === 0 ? (
-          <p className="text-gray-600 text-center">Tiada voucher yang telah ditebus.</p>
+          <p className="text-gray-600 text-center">No vouchers have been redeemed.</p>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
             {redeemedVouchers.map((voucher, idx) => (
@@ -42,9 +42,9 @@ export default function History() {
                   className="w-full h-40 object-cover rounded-md mb-4"
                 />
                 <h3 className="text-lg font-semibold">{voucher.name}</h3>
-                <p className="text-sm text-gray-600">Harga: {voucher.price} pts</p>
+                <p className="text-sm text-gray-600">Price: {voucher.price} pts</p>
                 <p className="text-sm text-gray-500">
-                  Ditebus pada: {new Date(voucher.redeemedAt).toLocaleString()}
+                  Claimed: {new Date(voucher.redeemedAt).toLocaleString()}
                 </p>
               </div>
             ))}

@@ -50,7 +50,7 @@ app.post('/signup', async (req, res) => {
 
   const usernameRegex = /^[a-zA-Z0-9]{6,}$/;
   if (!usernameRegex.test(username)) {
-    return res.status(400).json({ message: 'Username mesti huruf/nombor minimum 6 aksara' });
+    return res.status(400).json({ message: 'Username must be letters/numbers with a minimum of 6 characters.' });
   }
 
   try {
@@ -74,10 +74,10 @@ app.post('/signup', async (req, res) => {
     });
 
     await newUser.save();
-    res.status(201).json({ message: 'Pendaftaran berjaya!' });
+    res.status(201).json({ message: 'Signup successful!' });
   } catch (err) {
     console.error('Signup error:', err);
-    res.status(500).json({ message: 'Ralat server semasa signup.' });
+    res.status(500).json({ message: 'Error during signup.' });
   }
 });
 
@@ -104,10 +104,10 @@ app.post('/login', async (req, res) => {
     };
 
     // Jika berjaya
-    res.status(200).json({ message: 'Login berjaya', user });
+    res.status(200).json({ message: 'Login successful', user });
   } catch (err) {
     console.error('Login error:', err);
-    res.status(500).json({ message: 'Ralat semasa login.' });
+    res.status(500).json({ message: 'Error during login.' });
   }
 });
 
@@ -176,7 +176,10 @@ app.post('/reset-password/:token', async (req, res) => {
 
 // Google OAuth
 app.get('/auth/google',
-  passport.authenticate('google', { scope: ['profile', 'email'] })
+  passport.authenticate('google', { 
+    scope: ['profile', 'email'],
+    prompt: 'select_account' // 👈 force account chooser every time
+  })
 );
 
 app.get('/auth/google/callback',
@@ -262,44 +265,65 @@ app.get('/redeemed/:id', async (req, res) => {
   }
 });
 
-// redeem/reward
-
+// Redeem voucher
 app.post('/redeem', async (req, res) => {
   const { userId, voucher } = req.body;
+  const quantity = voucher.quantity || 1; // Default 1 if not provided
 
   try {
     const user = await User.findById(userId);
-    if (!user) return res.status(404).json({ message: 'User tidak dijumpai' });
+    const dbVoucher = await Voucher.findById(voucher._id);
 
-    const quantity = Number(voucher.quantity) || 1;
-    const totalPrice = Number(voucher.price); // Sudah dikira di frontend
+    if (!user) return res.status(404).json({ message: "User not found" });
+    if (!dbVoucher) return res.status(404).json({ message: "Voucher not found" });
 
-    if (isNaN(totalPrice) || totalPrice <= 0) {
-      return res.status(400).json({ message: 'Harga tidak sah' });
+    if (dbVoucher.available < quantity) {
+      return res.status(400).json({ message: "Not enough vouchers available" });
     }
+
+    const totalPrice = dbVoucher.price * quantity;
 
     if (user.points < totalPrice) {
-      return res.status(400).json({ message: 'Point tidak mencukupi untuk menebus' });
+      return res.status(400).json({ message: "Not enough points" });
     }
 
+    // Deduct points
     user.points -= totalPrice;
 
-    for (let i = 0; i < quantity; i++) {
-      user.rewards.push({
-        id: voucher.id,
-        name: voucher.name,
-        image: voucher.image,
-        price: voucher.price / quantity,
-        redeemedAt: new Date()
-      });
-    }
+    // Deduct voucher availability
+    dbVoucher.available -= quantity;
+    await dbVoucher.save();
+
+    // Save redeemed voucher in user profile
+    user.rewards.push({
+      id: dbVoucher._id,
+      name: dbVoucher.name,
+      image: dbVoucher.image,
+      price: dbVoucher.price,
+      quantity, // Store how many redeemed
+      redeemedAt: new Date()
+    });
 
     await user.save();
 
-    res.json({ message: 'Tebus berjaya', points: user.points });
+    res.json({ message: "Redeemed successfully", points: user.points });
   } catch (err) {
-    console.error('Redeem error:', err);
-    res.status(500).json({ message: 'Ralat semasa redeem' });
+    console.error("Redeem error:", err);
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
+
+const Voucher = require('./models/Voucher'); // Create this model
+
+// Get all vouchers
+app.get('/voucher', async (req, res) => {
+  try {
+    const vouchers = await Voucher.find({});
+    res.json(vouchers);
+  } catch (err) {
+    console.error('Error fetching vouchers:', err);
+    res.status(500).json({ message: 'Failed to fetch vouchers' });
   }
 });
 

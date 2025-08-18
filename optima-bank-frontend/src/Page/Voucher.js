@@ -11,61 +11,28 @@ const Voucher = () => {
 
   useEffect(() => {
     const storedUser = localStorage.getItem("user");
-    if (storedUser) {
-      setUser(JSON.parse(storedUser));
-    }
+    if (storedUser) setUser(JSON.parse(storedUser));
   }, []);
 
+  // Fetch vouchers from backend
   useEffect(() => {
-    const sampleVouchers = [
-      {
-        id: "1",
-        name: "RM15 Off Shirt",
-        price: 300,
-        image: '/1.png',
-        category: 'Clothing',
-        description: 'Enjoy RM10 discount on selected clothing.',
-        terms: 'Valid through 30 December. T&Cs apply.'
-      },
-      {
-        id: "2",
-        name: "Free Fried Chicken",
-        price: 200,
-        image: '/2.png',
-        category: 'Food',
-        description: 'Enjoy a free fried chicken at selected restaurants.',
-        terms: 'Redeemable at participating outlets. Valid for single use only.'
-      },
-      {
-        id: "3",
-        name: "20% Off Handbag",
-        price: 250,
-        image: '/3.png',
-        category: 'Handbag',
-        description: 'Get 20% off all Brand X handbags.',
-        terms: 'Valid at Brand X boutiques. Not valid with other promotions.'
-      },
-      {
-        id: "4",
-        name: "RM20 Off Shoes",
-        price: 180,
-        image: '/4.png',
-        category: 'Shoes',
-        description: 'Enjoy RM20 discount on selected sports shoes.',
-        terms: 'Available while sizes and stocks last.'
-      },
-    ];
-    setVouchers(sampleVouchers);
-    setFilteredVouchers(sampleVouchers);
+    const fetchVouchers = async () => {
+      try {
+        const res = await fetch('http://localhost:5000/voucher'); // your backend route
+        const data = await res.json();
+        setVouchers(data);
+        setFilteredVouchers(data);
+      } catch (err) {
+        console.error("Failed to fetch vouchers:", err);
+      }
+    };
+    fetchVouchers();
   }, []);
 
   const handleCategoryChange = (category) => {
     setSelectedCategory(category);
-    if (category === 'All') {
-      setFilteredVouchers(vouchers);
-    } else {
-      setFilteredVouchers(vouchers.filter(v => v.category === category));
-    }
+    if (category === 'All') setFilteredVouchers(vouchers);
+    else setFilteredVouchers(vouchers.filter(v => v.category === category));
   };
 
   const addToCart = (voucher) => {
@@ -91,16 +58,13 @@ const Voucher = () => {
       });
 
       const data = await res.json();
-
       if (res.ok) {
-        alert('Redeem Successfull!');
+        alert('Redeem Successful!');
         const updatedUser = { ...user, points: data.points };
         setUser(updatedUser);
         localStorage.setItem('user', JSON.stringify(updatedUser));
         setSelectedVoucher(null);
-      } else {
-        alert(data.message);
-      }
+      } else alert(data.message);
     } catch (err) {
       console.error(err);
       alert("Error while redeeming voucher.");
@@ -116,7 +80,7 @@ const Voucher = () => {
         <center><h2 className="text-3xl font-bold mb-6">Voucher List</h2></center>
 
         <div className="flex flex-wrap justify-center gap-3 mb-8">
-          {categories.map((category) => (
+          {categories.map(category => (
             <button
               key={category}
               onClick={() => handleCategoryChange(category)}
@@ -132,8 +96,8 @@ const Voucher = () => {
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
-          {filteredVouchers.map((voucher) => (
-            <div key={voucher.id} className="bg-white rounded-2xl shadow p-4">
+          {filteredVouchers.map(voucher => (
+            <div key={voucher._id || voucher.id} className={`bg-white rounded-2xl shadow p-4 ${voucher.available === 0 ? 'opacity-50 pointer-events-none' : ''}`}>
               <img
                 src={voucher.image}
                 alt={voucher.name}
@@ -143,11 +107,13 @@ const Voucher = () => {
               <h3 className="text-lg font-semibold">{voucher.name}</h3>
               <p className="text-sm text-gray-500">Category: {voucher.category}</p>
               <p className="text-gray-600 mb-2">Price: {voucher.price} pts</p>
+              <p className="text-red-600 font-medium mb-2">Available: {voucher.available}</p>
               <button
                 onClick={() => setSelectedVoucher(voucher)}
-                className="bg-blue-600 text-white px-4 py-1 rounded hover:bg-blue-700"
+                disabled={voucher.available === 0}
+                className={`px-4 py-1 rounded text-white ${voucher.available === 0 ? 'bg-gray-400 cursor-not-allowed' : 'bg-blue-600 hover:bg-blue-700'}`}
               >
-                Details
+                {voucher.available === 0 ? 'Unavailable' : 'Details'}
               </button>
             </div>
           ))}

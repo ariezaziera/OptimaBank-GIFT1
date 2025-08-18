@@ -30,6 +30,7 @@ const userSchema = new mongoose.Schema({
       id: String,
       name: String,
       image: String,
+      price: Number,
       redeemedAt: Date
     }
   ]
