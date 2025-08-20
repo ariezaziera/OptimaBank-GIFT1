@@ -1,8 +1,10 @@
 // src/Page/Voucher.js
 import React, { useState, useEffect } from 'react';
+import { useLocation } from 'react-router-dom';   // ✅ import here
 import Navbar from '../Navbar';
 
 const Voucher = () => {
+  const location = useLocation(); // ✅ must be inside component
   const [vouchers, setVouchers] = useState([]);
   const [filteredVouchers, setFilteredVouchers] = useState([]);
   const [selectedCategory, setSelectedCategory] = useState('All');
@@ -10,24 +12,36 @@ const Voucher = () => {
   const [selectedVoucher, setSelectedVoucher] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
 
+  // Load user
   useEffect(() => {
     const storedUser = localStorage.getItem("user");
     if (storedUser) setUser(JSON.parse(storedUser));
   }, []);
 
+  // Fetch vouchers
   useEffect(() => {
     const fetchVouchers = async () => {
       try {
         const res = await fetch('http://localhost:5000/voucher');
         const data = await res.json();
         setVouchers(data);
-        setFilteredVouchers(data);
+
+        // ✅ Read query param ?category=Clothing
+        const params = new URLSearchParams(location.search);
+        const categoryFromUrl = params.get('category');
+
+        if (categoryFromUrl && categoryFromUrl !== 'All') {
+          setSelectedCategory(categoryFromUrl);
+          setFilteredVouchers(data.filter(v => v.category === categoryFromUrl));
+        } else {
+          setFilteredVouchers(data);
+        }
       } catch (err) {
         console.error("Failed to fetch vouchers:", err);
       }
     };
     fetchVouchers();
-  }, []);
+  }, [location.search]);
 
   const handleCategoryChange = (category) => {
     setSelectedCategory(category);
@@ -108,7 +122,12 @@ const Voucher = () => {
         {/* Voucher Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
           {filteredVouchers.map(voucher => (
-            <div key={voucher._id || voucher.id} className={`bg-white rounded-2xl shadow p-4 ${voucher.available === 0 ? 'opacity-50 pointer-events-none' : ''}`}>
+            <div
+              key={voucher._id || voucher.id}
+              className={`bg-white rounded-2xl shadow p-4 ${
+                voucher.available === 0 ? 'opacity-50 pointer-events-none' : ''
+              }`}
+            >
               <img
                 src={voucher.image}
                 alt={voucher.name}

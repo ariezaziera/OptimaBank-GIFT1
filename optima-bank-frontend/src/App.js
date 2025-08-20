@@ -10,6 +10,8 @@ import Voucher from './Page/Voucher';
 import Cart from './Page/Cart';
 import History from './Page/History';
 import AboutUs from './Page/AboutUs';
+import "slick-carousel/slick/slick.css"; 
+import "slick-carousel/slick/slick-theme.css";
 import './App.css'; // optional: global styling
 
 function App() {

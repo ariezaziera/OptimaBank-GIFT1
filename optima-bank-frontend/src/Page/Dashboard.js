@@ -1,10 +1,14 @@
 // frontend/src/Page/Dashboard.js
 import React, { useEffect, useState } from 'react';
 import Navbar from '../Navbar';
+import Slider from "react-slick";
+import "slick-carousel/slick/slick.css";
+import "slick-carousel/slick/slick-theme.css";
+import { useNavigate } from "react-router-dom";
 
 const Dashboard = () => {
   const [user, setUser] = useState(null);
-  const [promotions, setPromotions] = useState([]);
+  const navigate = useNavigate();
 
   // Load user from params or localStorage
   useEffect(() => {
@@ -34,14 +38,6 @@ const Dashboard = () => {
     if (savedUser) setUser(savedUser);
   }, []);
 
-  // Fetch promotions
-  useEffect(() => {
-    fetch("http://localhost:5000/api/promotions")
-      .then(res => res.json())
-      .then(data => setPromotions(data))
-      .catch(err => console.error("Error fetching promotions:", err));
-  }, []);
-
   const handleLogout = async () => {
     const confirmLogout = window.confirm("Are you sure you want to logout?");
     if (!confirmLogout) return;
@@ -63,6 +59,26 @@ const Dashboard = () => {
     }
   };
 
+  // Slider settings
+  const sliderSettings = {
+    dots: true,
+    infinite: true,
+    speed: 600,
+    slidesToShow: 1,
+    slidesToScroll: 1,
+    autoplay: true,
+    autoplaySpeed: 4000,
+    arrows: false,
+  };
+
+  // Local promotion images & categories
+  const promoBanners = [
+    { img: "/1.png", category: "Clothing" },
+    { img: "/2.png", category: "Food" },
+    { img: "/3.png", category: "Handbag" },
+    { img: "/4.png", category: "Shoes" },
+  ];
+
   return (
     <div className="min-h-screen bg-gradient-to-r from-blue-200 to-white text-blue-950 px-6 py-6">
       <Navbar user={user} handleLogout={handleLogout} />
@@ -74,51 +90,46 @@ const Dashboard = () => {
             👋 Hello{user ? `, ${user.username}` : ''}!
           </h2>
           <p className="text-lg mb-2">Welcome to Optima Bank Dashboard</p>
-
-          {user && (
-            <p className="text-lg font-semibold mt-4">
-              Your Points: <span className="text-green-700">{user.points}</span>
-            </p>
-          )}
         </div>
 
-        {/* Account Overview */}
-        <div className="grid md:grid-cols-3 gap-6">
-          <div className="bg-blue-600 text-white p-6 rounded-2xl shadow-md hover:scale-105 transition-transform">
-            <h3 className="text-xl font-bold">💰 Main Account</h3>
-            <p className="text-2xl mt-2">RM 12,350.50</p>
-            <p className="mt-1 opacity-80">Available Balance</p>
+        {/* Points Island */}
+        {user && (
+          <div
+            className="bg-gradient-to-r from-green-400 to-green-600 text-white p-8 rounded-3xl shadow-lg text-center transform hover:scale-105 transition-transform cursor-pointer"
+            onClick={() => navigate("/voucher")}
+          >
+            <h3 className="text-2xl font-bold">🏆 Your Reward Points</h3>
+            <p className="text-4xl font-extrabold mt-3">{user.points}</p>
+            <p className="opacity-90 mt-1">Click to redeem vouchers</p>
           </div>
+        )}
 
-          <div className="bg-green-600 text-white p-6 rounded-2xl shadow-md hover:scale-105 transition-transform">
-            <h3 className="text-xl font-bold">🏦 Savings</h3>
-            <p className="text-2xl mt-2">RM 4,500.00</p>
-            <p className="mt-1 opacity-80">Emergency Fund</p>
-          </div>
-
-          <div className="bg-purple-600 text-white p-6 rounded-2xl shadow-md hover:scale-105 transition-transform">
-            <h3 className="text-xl font-bold">📊 Transactions</h3>
-            <p className="text-2xl mt-2">+ RM 2,100</p>
-            <p className="mt-1 opacity-80">This Month</p>
-          </div>
-        </div>
-
-        {/* Promotions */}
+        {/* Promotions Slider */}
         <div className="bg-white/70 p-6 rounded-2xl shadow-md">
           <h3 className="text-2xl font-bold mb-4">🔥 Ongoing Promotions</h3>
-          {promotions.length > 0 ? (
-            <div className="grid md:grid-cols-2 gap-6">
-              {promotions.map((promo) => (
-                <div key={promo._id} className="bg-gradient-to-r from-yellow-200 to-orange-300 p-4 rounded-xl shadow hover:shadow-lg transition">
-                  <h4 className="text-lg font-bold">{promo.title}</h4>
-                  <p className="mt-2">{promo.description}</p>
-                  <p className="text-sm text-gray-700 mt-1">Valid until: {new Date(promo.expiryDate).toLocaleDateString()}</p>
+          <Slider {...sliderSettings}>
+            {promoBanners.map((promo, index) => (
+                <div
+                  key={index}
+                  className="relative rounded-xl overflow-hidden shadow-lg cursor-pointer"
+                  onClick={() => navigate(`/voucher?category=${promo.category}`)}
+                >
+                  {/* Dark overlay for dim effect */}
+                  <img
+                    src={promo.img}
+                    alt={promo.category}
+                    className="w-full h-64 object-cover brightness-75"
+                  />
+                  
+                  {/* Category text overlay */}
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <span className="bg-black/50 text-white px-6 py-2 rounded-lg text-xl font-bold shadow-md">
+                      {promo.category}
+                    </span>
+                  </div>
                 </div>
               ))}
-            </div>
-          ) : (
-            <p className="text-gray-600">No promotions available right now.</p>
-          )}
+          </Slider>
         </div>
       </main>
     </div>
