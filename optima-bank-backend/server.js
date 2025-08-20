@@ -265,44 +265,51 @@ app.get('/redeemed/:id', async (req, res) => {
   }
 });
 
-// Redeem voucher
+// Redeem vouchers (bulk)
 app.post('/redeem', async (req, res) => {
-  const { userId, voucher } = req.body;
-  const quantity = voucher.quantity || 1; // Default 1 if not provided
+  const { userId, vouchers } = req.body;
 
   try {
     const user = await User.findById(userId);
-    const dbVoucher = await Voucher.findById(voucher._id);
-
     if (!user) return res.status(404).json({ message: "User not found" });
-    if (!dbVoucher) return res.status(404).json({ message: "Voucher not found" });
 
-    if (dbVoucher.available < quantity) {
-      return res.status(400).json({ message: "Not enough vouchers available" });
+    let totalCost = 0;
+
+    // Step 1: Validate all vouchers
+    for (const v of vouchers) {
+      const dbVoucher = await Voucher.findById(v._id);
+      if (!dbVoucher) return res.status(404).json({ message: `Voucher ${v.name} not found` });
+
+      if (dbVoucher.available < v.quantity) {
+        return res.status(400).json({ message: `Not enough availability for ${v.name}` });
+      }
+
+      totalCost += dbVoucher.price * v.quantity;
     }
 
-    const totalPrice = dbVoucher.price * quantity;
-
-    if (user.points < totalPrice) {
+    // Step 2: Check points
+    if (user.points < totalCost) {
       return res.status(400).json({ message: "Not enough points" });
     }
 
-    // Deduct points
-    user.points -= totalPrice;
+    // Step 3: Deduct points
+    user.points -= totalCost;
 
-    // Deduct voucher availability
-    dbVoucher.available -= quantity;
-    await dbVoucher.save();
+    // Step 4: Deduct availability + save to rewards
+    for (const v of vouchers) {
+      const dbVoucher = await Voucher.findById(v._id);
+      dbVoucher.available -= v.quantity;
+      await dbVoucher.save();
 
-    // Save redeemed voucher in user profile
-    user.rewards.push({
-      id: dbVoucher._id,
-      name: dbVoucher.name,
-      image: dbVoucher.image,
-      price: dbVoucher.price,
-      quantity, // Store how many redeemed
-      redeemedAt: new Date()
-    });
+      user.rewards.push({
+        id: dbVoucher._id,
+        name: dbVoucher.name,
+        image: dbVoucher.image,
+        price: dbVoucher.price,
+        quantity: v.quantity,
+        redeemedAt: new Date()
+      });
+    }
 
     await user.save();
 
@@ -312,6 +319,7 @@ app.post('/redeem', async (req, res) => {
     res.status(500).json({ message: "Server error" });
   }
 });
+
 
 
 const Voucher = require('./models/Voucher'); // Create this model
@@ -326,6 +334,7 @@ app.get('/voucher', async (req, res) => {
     res.status(500).json({ message: 'Failed to fetch vouchers' });
   }
 });
+
 
 
 // Start server

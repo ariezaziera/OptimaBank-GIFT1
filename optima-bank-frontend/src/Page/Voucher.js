@@ -8,17 +8,17 @@ const Voucher = () => {
   const [selectedCategory, setSelectedCategory] = useState('All');
   const [user, setUser] = useState(null);
   const [selectedVoucher, setSelectedVoucher] = useState(null);
+  const [searchTerm, setSearchTerm] = useState('');
 
   useEffect(() => {
     const storedUser = localStorage.getItem("user");
     if (storedUser) setUser(JSON.parse(storedUser));
   }, []);
 
-  // Fetch vouchers from backend
   useEffect(() => {
     const fetchVouchers = async () => {
       try {
-        const res = await fetch('http://localhost:5000/voucher'); // your backend route
+        const res = await fetch('http://localhost:5000/voucher');
         const data = await res.json();
         setVouchers(data);
         setFilteredVouchers(data);
@@ -31,8 +31,29 @@ const Voucher = () => {
 
   const handleCategoryChange = (category) => {
     setSelectedCategory(category);
-    if (category === 'All') setFilteredVouchers(vouchers);
-    else setFilteredVouchers(vouchers.filter(v => v.category === category));
+    filterVouchers(searchTerm, category);
+  };
+
+  const handleSearchChange = (e) => {
+    const value = e.target.value;
+    setSearchTerm(value);
+    filterVouchers(value, selectedCategory);
+  };
+
+  const filterVouchers = (search, category) => {
+    let result = vouchers;
+
+    if (category !== 'All') {
+      result = result.filter(v => v.category === category);
+    }
+
+    if (search.trim() !== '') {
+      result = result.filter(v =>
+        v.name.toLowerCase().includes(search.toLowerCase())
+      );
+    }
+
+    setFilteredVouchers(result);
   };
 
   const addToCart = (voucher) => {
@@ -48,29 +69,6 @@ const Voucher = () => {
     setSelectedVoucher(null);
   };
 
-  const handleRedeem = async () => {
-    try {
-      selectedVoucher.price = Number(selectedVoucher.price);
-      const res = await fetch('http://localhost:5000/redeem', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ userId: user._id, voucher: selectedVoucher })
-      });
-
-      const data = await res.json();
-      if (res.ok) {
-        alert('Redeem Successful!');
-        const updatedUser = { ...user, points: data.points };
-        setUser(updatedUser);
-        localStorage.setItem('user', JSON.stringify(updatedUser));
-        setSelectedVoucher(null);
-      } else alert(data.message);
-    } catch (err) {
-      console.error(err);
-      alert("Error while redeeming voucher.");
-    }
-  };
-
   const categories = ['All', 'Clothing', 'Food', 'Handbag', 'Shoes'];
 
   return (
@@ -79,7 +77,8 @@ const Voucher = () => {
       <div className="max-w-6xl mx-auto p-4 mt-24">
         <center><h2 className="text-3xl font-bold mb-6">Voucher List</h2></center>
 
-        <div className="flex flex-wrap justify-center gap-3 mb-8">
+        {/* Categories */}
+        <div className="flex flex-wrap justify-center gap-3 mb-4">
           {categories.map(category => (
             <button
               key={category}
@@ -95,6 +94,18 @@ const Voucher = () => {
           ))}
         </div>
 
+        {/* Search bar */}
+        <div className="flex justify-center mb-8">
+          <input
+            type="text"
+            value={searchTerm}
+            onChange={handleSearchChange}
+            placeholder="Search vouchers..."
+            className="w-full md:w-1/2 px-4 py-2 border rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+          />
+        </div>
+
+        {/* Voucher Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
           {filteredVouchers.map(voucher => (
             <div key={voucher._id || voucher.id} className={`bg-white rounded-2xl shadow p-4 ${voucher.available === 0 ? 'opacity-50 pointer-events-none' : ''}`}>
@@ -108,13 +119,28 @@ const Voucher = () => {
               <p className="text-sm text-gray-500">Category: {voucher.category}</p>
               <p className="text-gray-600 mb-2">Price: {voucher.price} pts</p>
               <p className="text-red-600 font-medium mb-2">Available: {voucher.available}</p>
-              <button
-                onClick={() => setSelectedVoucher(voucher)}
-                disabled={voucher.available === 0}
-                className={`px-4 py-1 rounded text-white ${voucher.available === 0 ? 'bg-gray-400 cursor-not-allowed' : 'bg-blue-600 hover:bg-blue-700'}`}
-              >
-                {voucher.available === 0 ? 'Unavailable' : 'Details'}
-              </button>
+
+              {/* Buttons side by side */}
+              <div className="flex gap-2">
+                <button
+                  onClick={() => setSelectedVoucher(voucher)}
+                  disabled={voucher.available === 0}
+                  className={`flex-1 px-4 py-1 rounded text-white ${
+                    voucher.available === 0 ? 'bg-gray-400 cursor-not-allowed' : 'bg-blue-600 hover:bg-blue-700'
+                  }`}
+                >
+                  {voucher.available === 0 ? 'Unavailable' : 'Details'}
+                </button>
+                <button
+                  onClick={() => addToCart(voucher)}
+                  disabled={voucher.available === 0}
+                  className={`flex-1 px-4 py-1 rounded text-white ${
+                    voucher.available === 0 ? 'bg-gray-400 cursor-not-allowed' : 'bg-green-600 hover:bg-green-700'
+                  }`}
+                >
+                  Add to Cart
+                </button>
+              </div>
             </div>
           ))}
         </div>
@@ -140,12 +166,8 @@ const Voucher = () => {
             <p className="mb-2 font-medium">Price: {selectedVoucher.price} pts</p>
             <p className="text-sm mb-2"><strong>Description:</strong> {selectedVoucher.description}</p>
             <p className="text-sm mb-4"><strong>Terms & Conditions:</strong> {selectedVoucher.terms}</p>
-            <button
-              onClick={handleRedeem}
-              className="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700 w-full mb-2"
-            >
-              Claim
-            </button>
+
+            {/* Only Add to Cart button here */}
             <button
               onClick={() => addToCart(selectedVoucher)}
               className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 w-full"
