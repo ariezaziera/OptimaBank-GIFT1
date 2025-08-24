@@ -75,11 +75,11 @@ export default function AboutUs() {
             {
               title: 'What Makes Us Different',
               list: [
-                'Zero monthly fees – because your money belongs to you.',
-                'Smart savings plans – tailored to your goals and income.',
-                '24/7 digital support – we\'re always just a tap away.',
-                'Real-time notifications – full control, no surprises.',
-                'Secure and encrypted platform – your data is safe with us.'
+                'Zero monthly fees – Because your money belongs to you.',
+                'Smart savings plans – Tailored to your goals and income.',
+                '24/7 digital support – We\'re always just a tap away.',
+                'Real-time notifications – Full control, no surprises.',
+                'Secure and encrypted platform – Your data is safe with us.'
               ]
             }
           ].map((section, index, array) => (
