@@ -73,7 +73,7 @@ const Profile = () => {
 
   return (
     <div>
-      <Navbar />
+      <Navbar user={user} handleLogout={handleLogout} />
       <div className="profile-container">
         <h1>Profile</h1>
         {user ? (

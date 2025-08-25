@@ -195,7 +195,8 @@ app.get('/auth/google/callback',
       email: user.email,
       firstName: user.firstName,
       lastName: user.lastName,
-      profileImage: user.profileImage || ''
+      profileImage: user.profileImage || '',
+      points: user.points ?? 0   // nullish coalescing, bukan falsy check
     };
     const query = new URLSearchParams(safeUser).toString();
     res.redirect(`http://localhost:3000/dashboard?${query}`);

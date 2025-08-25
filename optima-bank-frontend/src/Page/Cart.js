@@ -82,9 +82,30 @@ export default function Cart() {
     }
   };
 
+    const handleLogout = async () => {
+    const confirmLogout = window.confirm("Are you sure you want to logout?");
+    if (!confirmLogout) return;
+
+    try {
+      const res = await fetch('http://localhost:5000/logout', {
+        method: 'GET',
+        credentials: 'include',
+      });
+
+      if (res.ok) {
+        localStorage.removeItem('user');
+        window.location.href = 'http://localhost:3000/';
+      } else {
+        console.error('Logout failed:', await res.json());
+      }
+    } catch (err) {
+      console.error('Logout failed:', err);
+    }
+  };
+
   return (
     <>
-      <Navbar user={user} />
+      <Navbar user={user} handleLogout={handleLogout} />
       <div className="pt-24 px-6 max-w-5xl mx-auto">
         <h2 className="text-3xl font-semibold mb-6 text-center">Your Cart</h2>
 

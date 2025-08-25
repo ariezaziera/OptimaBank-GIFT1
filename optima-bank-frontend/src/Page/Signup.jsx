@@ -1,7 +1,7 @@
 // src/Signup.js
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import AuthLayout from '../AuthLayout';
+import Navbar from '../Navbar';
 
 export default function Signup() {
   const navigate = useNavigate();
@@ -89,23 +89,56 @@ export default function Signup() {
     }
   };
 
+  const handleLogout = async () => {
+    const confirmLogout = window.confirm("Are you sure you want to logout?");
+    if (!confirmLogout) return;
+
+    try {
+      const res = await fetch('http://localhost:5000/logout', {
+        method: 'GET',
+        credentials: 'include',
+      });
+
+      if (res.ok) {
+        localStorage.removeItem('user');
+        window.location.href = 'http://localhost:3000/';
+      } else {
+        console.error('Logout failed:', await res.json());
+      }
+    } catch (err) {
+      console.error('Logout failed:', err);
+    }
+  };
+
   return (
-    <AuthLayout bgImage="">
-      <h2 className="text-white text-3xl font-bold text-center mb-6">Signup</h2>
-      <form className="grid grid-cols-2 gap-4" onSubmit={handleSubmit}>
-        <input type="text" name="firstName" placeholder="First Name" onChange={handleChange} value={formData.firstName} className="p-3 rounded-lg outline-none" required />
-        <input type="text" name="lastName" placeholder="Last Name" onChange={handleChange} value={formData.lastName} className="p-3 rounded-lg outline-none" />
-        <input type="text" name="username" placeholder="Username" onChange={handleChange} value={formData.username} className="p-3 rounded-lg outline-none col-span-2" required />
-        <input type="date" name="dob" placeholder="Date Of Birth" onChange={handleChange} value={formData.dob} className="p-3 rounded-lg outline-none col-span-2" required />
-        <input type="text" name="phone" placeholder="Phone No." onChange={handleChange} value={formData.phone} className="p-3 rounded-lg outline-none" required />
-        <input type="email" name="email" placeholder="Email" onChange={handleChange} value={formData.email} className="p-3 rounded-lg outline-none" required />
-        <input type="password" name="password" placeholder="Password (min 6 characters)" onChange={handleChange} value={formData.password} className="p-3 rounded-lg outline-none" required />
-        <input type="password" name="confirmPassword" placeholder="Confirm Password" onChange={handleChange} value={formData.confirmPassword} className="p-3 rounded-lg outline-none" required />
-        <button type="submit" className="col-span-2 bg-white text-black font-bold py-2 rounded-full">Signup</button>
-      </form>
-      <p className="text-center text-white mt-4">
-        Already have an account? <Link to="/" className="underline text-white">Login</Link>
-      </p>
-    </AuthLayout>
+    <>
+      <Navbar handleLogout={handleLogout} />
+
+      <div 
+        className="min-h-screen bg-cover bg-center flex flex-col items-center justify-center px-4"
+        style={{ backgroundImage: `url('/bg.png')` }} // <-- tukar ikut image path
+      >
+
+        <div className="p-8 rounded-xl shadow-lg w-full max-w-2xl" style={{ backgroundColor: 'rgba(3, 49, 66, 0.4)' }}>
+          <h2 className="text-white text-3xl font-bold text-center mb-6">Signup</h2>
+          
+          <form className="grid grid-cols-2 gap-4" onSubmit={handleSubmit}>
+            <input type="text" name="firstName" placeholder="First Name" onChange={handleChange} value={formData.firstName} className="p-3 rounded-lg outline-none" required />
+            <input type="text" name="lastName" placeholder="Last Name" onChange={handleChange} value={formData.lastName} className="p-3 rounded-lg outline-none" />
+            <input type="text" name="username" placeholder="Username" onChange={handleChange} value={formData.username} className="p-3 rounded-lg outline-none col-span-2" required />
+            <input type="date" name="dob" placeholder="Date Of Birth" onChange={handleChange} value={formData.dob} className="p-3 rounded-lg outline-none col-span-2" required />
+            <input type="text" name="phone" placeholder="Phone No." onChange={handleChange} value={formData.phone} className="p-3 rounded-lg outline-none" required />
+            <input type="email" name="email" placeholder="Email" onChange={handleChange} value={formData.email} className="p-3 rounded-lg outline-none" required />
+            <input type="password" name="password" placeholder="Password (min 6 characters)" onChange={handleChange} value={formData.password} className="p-3 rounded-lg outline-none" required />
+            <input type="password" name="confirmPassword" placeholder="Confirm Password" onChange={handleChange} value={formData.confirmPassword} className="p-3 rounded-lg outline-none" required />
+            <button type="submit" className="col-span-2 bg-white text-black font-bold py-2 rounded-full">Signup</button>
+          </form>
+
+          <p className="text-center text-white mt-4">
+            Already have an account? <Link to="/" className="underline text-white">Login</Link>
+          </p>
+        </div>
+      </div>
+    </>
   );
 }

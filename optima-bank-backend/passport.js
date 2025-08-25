@@ -20,8 +20,14 @@ passport.use(
             email: profile.emails[0].value,
             provider: "google",
             profileImage: profile.photos[0].value,
-            points: 500, // ✅ give bonus on Google signup
+            points: 500
           });
+        } else {
+          // kalau user lama takde points field, set sekarang
+          if (user.points === undefined) {
+            user.points = 500;
+            await user.save();
+          }
         }
         return done(null, user);
       } catch (err) {
