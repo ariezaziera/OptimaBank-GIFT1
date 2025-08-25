@@ -103,7 +103,7 @@ export default function Cart() {
   return (
     <>
       <Navbar user={user} handleLogout={handleLogout} />
-      <div className="pt-28 px-6 max-w-6xl mx-auto min-h-screen">
+      <div className="pt-28 px-6 max-w-6xl mx-auto min-h-screen mb-10">
         <h2 className="text-4xl font-extrabold mb-10 text-center text-cyan-950 tracking-tight">
           🛒 Your Cart
         </h2>

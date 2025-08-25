@@ -119,7 +119,7 @@ export default function Signup() {
         style={{ backgroundImage: `url('/bg.png')` }} // <-- tukar ikut image path
       >
 
-        <div className="p-8 rounded-xl shadow-lg w-full max-w-2xl" style={{ backgroundColor: 'rgba(3, 49, 66, 0.4)' }}>
+        <div className="bg-cyan-950/50 p-8 rounded-xl shadow-lg w-full max-w-2xl m-24">
           <h2 className="text-white text-3xl font-bold text-center mb-6">Signup</h2>
           
           <form className="grid grid-cols-2 gap-4" onSubmit={handleSubmit}>
