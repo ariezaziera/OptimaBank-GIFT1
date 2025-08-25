@@ -40,7 +40,7 @@ function App() {
         <Route path="/voucher" element={<Voucher handleAddToCart={handleAddToCart} />} />
         <Route path="/cart" element={ <Cart cartItems={cartItems} handleRemoveFromCart={handleRemoveFromCart} />}/>
         <Route path="/history" element={<History />} /> 
-        <Route path="/about-us" element={<AboutUs />} />
+        <Route path="/AboutUs" element={<AboutUs />} />
       </Routes> {/* ✅ Close this tag */}
     </Router>
   );

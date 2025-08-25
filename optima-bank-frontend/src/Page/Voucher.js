@@ -1,10 +1,10 @@
 // src/Page/Voucher.js
 import React, { useState, useEffect } from 'react';
-import { useLocation } from 'react-router-dom';   // ✅ import here
+import { useLocation } from 'react-router-dom';
 import Navbar from '../Navbar';
 
 const Voucher = () => {
-  const location = useLocation(); // ✅ must be inside component
+  const location = useLocation();
   const [vouchers, setVouchers] = useState([]);
   const [filteredVouchers, setFilteredVouchers] = useState([]);
   const [selectedCategory, setSelectedCategory] = useState('All');
@@ -12,13 +12,11 @@ const Voucher = () => {
   const [selectedVoucher, setSelectedVoucher] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
 
-  // Load user
   useEffect(() => {
     const storedUser = localStorage.getItem("user");
     if (storedUser) setUser(JSON.parse(storedUser));
   }, []);
 
-  // Fetch vouchers
   useEffect(() => {
     const fetchVouchers = async () => {
       try {
@@ -26,7 +24,6 @@ const Voucher = () => {
         const data = await res.json();
         setVouchers(data);
 
-        // ✅ Read query param ?category=Clothing
         const params = new URLSearchParams(location.search);
         const categoryFromUrl = params.get('category');
 
@@ -54,7 +51,7 @@ const Voucher = () => {
     filterVouchers(value, selectedCategory);
   };
 
-    const handleLogout = async () => {
+  const handleLogout = async () => {
     const confirmLogout = window.confirm("Are you sure you want to logout?");
     if (!confirmLogout) return;
 
@@ -77,17 +74,10 @@ const Voucher = () => {
 
   const filterVouchers = (search, category) => {
     let result = vouchers;
-
-    if (category !== 'All') {
-      result = result.filter(v => v.category === category);
-    }
-
+    if (category !== 'All') result = result.filter(v => v.category === category);
     if (search.trim() !== '') {
-      result = result.filter(v =>
-        v.name.toLowerCase().includes(search.toLowerCase())
-      );
+      result = result.filter(v => v.name.toLowerCase().includes(search.toLowerCase()));
     }
-
     setFilteredVouchers(result);
   };
 
@@ -100,7 +90,7 @@ const Voucher = () => {
     }
     cart.push({ ...voucher, quantity: 1 });
     localStorage.setItem('cart', JSON.stringify(cart));
-    alert('Voucher was added to cart!');
+    alert('Voucher added to cart!');
     setSelectedVoucher(null);
   };
 
@@ -109,19 +99,23 @@ const Voucher = () => {
   return (
     <>
       <Navbar user={user} handleLogout={handleLogout} />
+
       <div className="max-w-6xl mx-auto p-4 mt-24">
-        <center><h2 className="text-3xl font-bold mb-6">Voucher List</h2></center>
+        {/* Page Title */}
+        <h2 className="text-3xl font-extrabold mb-6 text-center text-cyan-950 tracking-wide">
+          Available Vouchers
+        </h2>
 
         {/* Categories */}
-        <div className="flex flex-wrap justify-center gap-3 mb-4">
+        <div className="flex flex-wrap justify-center gap-3 mb-6">
           {categories.map(category => (
             <button
               key={category}
               onClick={() => handleCategoryChange(category)}
-              className={`px-4 py-2 rounded-full border font-medium ${
+              className={`px-5 py-2 rounded-full font-semibold transition-all duration-200 ${
                 selectedCategory === category
-                  ? 'bg-blue-600 text-white'
-                  : 'bg-white text-gray-800 border-gray-300 hover:bg-gray-100'
+                  ? 'bg-cyan-950 text-white shadow-lg scale-105'
+                  : 'bg-white text-gray-800 border border-gray-300 hover:bg-gray-100'
               }`}
             >
               {category}
@@ -129,23 +123,24 @@ const Voucher = () => {
           ))}
         </div>
 
-        {/* Search bar */}
+        {/* Search Bar */}
         <div className="flex justify-center mb-8">
           <input
             type="text"
             value={searchTerm}
             onChange={handleSearchChange}
             placeholder="Search vouchers..."
-            className="w-full md:w-1/3 px-4 py-2 border rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full md:w-1/3 px-4 py-3 rounded-lg shadow-md shadow-cyan-900/40 border border-gray-200 
+               focus:outline-none focus:ring-2 focus:ring-cyan-950 placeholder-gray-400 transition-all duration-200"
           />
         </div>
 
         {/* Voucher Grid */}
-        <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
           {filteredVouchers.map(voucher => (
             <div
               key={voucher._id || voucher.id}
-              className={`bg-white rounded-2xl shadow p-4 ${
+              className={`bg-white rounded-2xl shadow-lg p-4 hover:shadow-2xl hover:shadow-cyan-900/40 transform hover:-translate-y-1 transition-all duration-300 ${
                 voucher.available === 0 ? 'opacity-50 pointer-events-none' : ''
               }`}
             >
@@ -153,20 +148,21 @@ const Voucher = () => {
                 src={voucher.image}
                 alt={voucher.name}
                 onClick={() => setSelectedVoucher(voucher)}
-                className="w-full aspect-square object-cover rounded-xl mb-4 cursor-pointer"
+                className="w-full aspect-square object-cover rounded-xl mb-4 cursor-pointer hover:scale-105 transition-transform duration-300"
               />
-              <h3 className="text-2xl font-semibold">{voucher.name}</h3>
-              <p className="text-sm text-gray-500">Category: {voucher.category}</p>
-              <p className="text-gray-600 mb-2">Price: {voucher.price} pts</p>
-              <p className="text-red-600 font-medium mb-2">Available: {voucher.available}</p>
+              <h3 className="text-xl font-bold text-cyan-950 mb-1">{voucher.name}</h3>
+              <p className="text-sm text-gray-500 mb-1">Category: {voucher.category}</p>
+              <p className="text-gray-700 font-medium mb-1">Price: {voucher.price} pts</p>
+              <p className="text-red-600 font-semibold mb-3">Available: {voucher.available}</p>
 
-              {/* Buttons side by side */}
               <div className="flex gap-2">
                 <button
                   onClick={() => setSelectedVoucher(voucher)}
                   disabled={voucher.available === 0}
-                  className={`flex-1 px-4 py-1 rounded text-white ${
-                    voucher.available === 0 ? 'bg-gray-400 cursor-not-allowed' : 'bg-blue-600 hover:bg-blue-700'
+                  className={`flex-1 px-4 py-2 rounded-lg font-medium text-white transition-colors duration-200 ${
+                    voucher.available === 0
+                      ? 'bg-gray-400 cursor-not-allowed'
+                      : 'bg-blue-600 hover:bg-blue-700'
                   }`}
                 >
                   {voucher.available === 0 ? 'Unavailable' : 'Details'}
@@ -174,8 +170,10 @@ const Voucher = () => {
                 <button
                   onClick={() => addToCart(voucher)}
                   disabled={voucher.available === 0}
-                  className={`flex-1 px-4 py-1 rounded text-white ${
-                    voucher.available === 0 ? 'bg-gray-400 cursor-not-allowed' : 'bg-green-600 hover:bg-green-700'
+                  className={`flex-1 px-4 py-2 rounded-lg font-medium text-white transition-colors duration-200 ${
+                    voucher.available === 0
+                      ? 'bg-gray-400 cursor-not-allowed'
+                      : 'bg-green-600 hover:bg-green-700'
                   }`}
                 >
                   Add to Cart
@@ -186,34 +184,57 @@ const Voucher = () => {
         </div>
       </div>
 
-      {/* MODAL */}
+      {/* Modal */}
       {selectedVoucher && (
-        <div className="fixed inset-0 z-50 bg-black bg-opacity-40 flex items-center justify-center">
-          <div className="bg-white rounded-xl p-6 w-[90%] md:w-[500px] relative">
+        <div className="fixed inset-0 z-50 bg-black bg-opacity-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl shadow-2xl w-[90%] md:w-[80%] max-h-[90vh] overflow-y-auto relative">
+            {/* Close Button */}
             <button
               onClick={() => setSelectedVoucher(null)}
-              className="absolute top-3 right-3 text-gray-600 hover:text-black"
+              className="absolute top-4 right-5 text-gray-500 hover:text-gray-900 text-lg"
             >
               ✕
             </button>
-            <img
-              src={selectedVoucher.image}
-              alt={selectedVoucher.name}
-              className="w-full aspect-square object-cover rounded-lg mb-4"
-            />
-            <h2 className="text-2xl font-bold mb-2">{selectedVoucher.name}</h2>
-            <p className="text-gray-500 mb-1">Category: {selectedVoucher.category}</p>
-            <p className="mb-2 font-medium">Price: {selectedVoucher.price} pts</p>
-            <p className="text-sm mb-2"><strong>Description:</strong> {selectedVoucher.description}</p>
-            <p className="text-sm mb-4"><strong>Terms & Conditions:</strong> {selectedVoucher.terms}</p>
 
-            {/* Only Add to Cart button here */}
-            <button
-              onClick={() => addToCart(selectedVoucher)}
-              className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 w-full"
-            >
-              Add to Cart
-            </button>
+            {/* Grid Layout */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-0 p-12">
+              {/* Left: Image */}
+              <div>
+                <img
+                  src={selectedVoucher.image}
+                  alt={selectedVoucher.name}
+                  className="w-full h-full md:w-96 md:h-96 object-cover rounded-xl"
+                />
+              </div>
+
+              {/* Right: Details */}
+              <div className="flex flex-col">
+                <h2 className="text-2xl font-bold mb-2 text-cyan-950">
+                  {selectedVoucher.name}
+                </h2>
+                <p className="text-gray-500 mb-1">
+                  Category: {selectedVoucher.category}
+                </p>
+                <p className="mb-2 font-semibold text-gray-700">
+                  Price: {selectedVoucher.price} pts
+                </p>
+                <p className="text-gray-600 mb-2">
+                  <strong>Description:</strong> {selectedVoucher.description}
+                </p>
+                <p className="text-gray-600 mb-4">
+                  <strong>Terms & Conditions:</strong> {selectedVoucher.terms}
+                </p>
+
+                <div className="mt-auto">
+                  <button
+                    onClick={() => addToCart(selectedVoucher)}
+                    className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 w-full font-semibold transition-colors duration-200"
+                  >
+                    Add to Cart
+                  </button>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       )}

@@ -62,10 +62,10 @@ export default function Navbar({ user, handleLogout }) {
                 <Link to="/AboutUs" className={linkClass("/AboutUs")}>
                   About Us
                 </Link>
-                {currentPath !== "/login" ? (
+                {currentPath !== "/" ? (
                   <Link
-                    to="/login"
-                    className="bg-cyan-950 text-white font-semibold px-4 py-1 rounded-md hover:bg-gray-800"
+                    to="/"
+                    className="bg-cyan-950 text-white font-semibold px-4 py-1 rounded-md hover:bg-gray-800 hover:text-green-950"
                   >
                     Login
                   </Link>
@@ -93,60 +93,53 @@ export default function Navbar({ user, handleLogout }) {
         </div>
       </div>
 
-      {/* Mobile Menu */}
-      {isOpen && (
-        <div className="md:hidden bg-white px-4 pt-2 pb-3 space-y-2 shadow-md">
-          {user ? (
-            <>
-              <Link to="/dashboard" className={linkClass("/dashboard")}>
-                Home
-              </Link>
-              <Link to="/AboutUs" className={linkClass("/AboutUs")}>
-                About Us
-              </Link>
-              <Link to="/voucher" className={linkClass("/voucher")}>
-                Vouchers
-              </Link>
-              <Link to="/cart" className={linkClass("/cart")}>
-                Cart
-              </Link>
-              <Link to="/history" className={linkClass("/history")}>
-                History
-              </Link>
-              <Link to="/profile" className={linkClass("/profile")}>
-                Profile
-              </Link>
-              <button
-                onClick={handleLogout}
-                className="w-full bg-red-500 hover:bg-red-600 text-white font-semibold px-4 py-2 rounded-md"
-              >
-                Logout
-              </button>
-            </>
-          ) : (
-            <>
-              <Link to="/AboutUs" className={linkClass("/AboutUs")}>
-                About Us
-              </Link>
-              {currentPath !== "/login" ? (
-                <Link
-                  to="/login"
-                  className="w-full block bg-cyan-950 text-white font-semibold px-4 py-2 rounded-md hover:bg-gray-800 text-center"
-                >
-                  Login
-                </Link>
-              ) : (
-                <Link
-                  to="/signup"
-                  className="w-full block bg-cyan-950 text-white font-semibold px-4 py-2 rounded-md hover:bg-gray-800 text-center"
-                >
-                  Sign Up
-                </Link>
-              )}
-            </>
-          )}
-        </div>
-      )}
+{/* Mobile Menu */}
+{isOpen && (
+  <div className="md:hidden bg-white shadow-md px-4 pt-2 pb-3 space-y-2">
+    {user ? (
+      <>
+        {["/dashboard", "/AboutUs", "/voucher", "/cart", "/history", "/profile"].map((path) => (
+          <Link
+            key={path}
+            to={path}
+            className={`${linkClass(path)} block px-4 py-2 rounded-md hover:bg-gray-100 hover:text-gray-400`}
+          >
+            {path === "/dashboard"
+              ? "Home"
+              : path === "/AboutUs"
+              ? "About Us"
+              : path.slice(1).charAt(0).toUpperCase() + path.slice(2)}
+          </Link>
+        ))}
+
+        <button
+          onClick={handleLogout}
+          className="w-full bg-red-500 hover:bg-red-600 text-white font-semibold px-4 py-2 rounded-md"
+        >
+          Logout
+        </button>
+      </>
+    ) : (
+      <>
+        <Link
+          to="/AboutUs"
+          className={`${linkClass("/AboutUs")} block px-4 py-2 rounded-md hover:bg-gray-100`}
+        >
+          About Us
+        </Link>
+
+        <Link
+          to={currentPath !== "/" ? "/" : "/signup"}
+          className="w-full block bg-cyan-950 text-white font-semibold px-4 py-2 rounded-md text-center hover:bg-cyan-800"
+        >
+          {currentPath !== "/" ? "Login" : "Sign Up"}
+        </Link>
+      </>
+    )}
+  </div>
+)}
+
+
     </nav>
   );
 }

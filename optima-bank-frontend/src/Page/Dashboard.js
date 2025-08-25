@@ -108,7 +108,7 @@ const Dashboard = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-r from-blue-200 to-white text-blue-950 px-6 py-6">
+    <div className="min-h-screen bg-gradient-to-r from-blue-200 to-white text-blue-950 px-6 py-24">
       <Navbar user={user} handleLogout={handleLogout} />
 
       <main className="max-w-5xl mx-auto mt-10 space-y-8">
