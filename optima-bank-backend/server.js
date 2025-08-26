@@ -336,6 +336,37 @@ app.get('/voucher', async (req, res) => {
   }
 });
 
+const Redeemed = require('./models/Redeemed'); // ✅ import the model
+
+// Redeemed vouchers (bulk)
+app.post('/redeemed', async (req, res) => {
+  const { vouchers } = req.body;
+
+  try {
+    const redeemedResults = [];
+
+    for (const v of vouchers) {
+      const { id: voucherId, name, category, serials } = v;
+
+      // Push new serials into existing document, or create if not exists
+      const redeemedDoc = await Redeemed.findOneAndUpdate(
+        { voucherId },                         // match by voucherId
+        { 
+          $setOnInsert: { name, category },    // set name/category if new
+          $addToSet: { redeemedSerials: { $each: serials } } // avoid duplicates
+        },
+        { upsert: true, new: true }
+      );
+
+      redeemedResults.push(redeemedDoc);
+    }
+
+    res.json({ message: "Redeemed vouchers saved successfully", redeemed: redeemedResults });
+  } catch (err) {
+    console.error("Redeemed error:", err);
+    res.status(500).json({ message: "Server error" });
+  }
+});
 
 
 // Start server

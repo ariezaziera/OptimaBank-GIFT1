@@ -76,25 +76,36 @@ export default function Cart() {
 
     const vouchersToRedeem = cartItems.filter(item => selectedItems.includes(item.id));
 
-    // Generate serials locally
-    const redeemed = [];
-    vouchersToRedeem.forEach((v) => {
-      const qty = v.quantity || 1;
-      for (let i = 0; i < qty; i++) {
-        redeemed.push({
-          ...v,
-          serial: generateSerial(v), // each serial unique globally
-          redeemedAt: new Date(),
+    // Generate serials **once**
+    const redeemedVouchersList = [];
+    const vouchersForBackend = vouchersToRedeem.map(item => {
+      const serials = Array.from({ length: item.quantity || 1 }, () => generateSerial(item));
+      
+      // Push for modal display
+      serials.forEach(s => {
+        redeemedVouchersList.push({
+          ...item,
+          serial: s,
+          redeemedAt: new Date()
         });
-      }
+      });
+
+      return {
+        _id: item._id,
+        id: item.id,
+        name: item.name,
+        category: item.category,
+        quantity: item.quantity || 1,
+        serials
+      };
     });
 
-    setRedeemedVouchers(redeemed);
+    setRedeemedVouchers(redeemedVouchersList);
     setShowVoucherModal(true);
 
     try {
-      // Send to backend to update available stock
-      const res = await fetch("http://localhost:5000/redeem", {
+      // Update stock
+      const resStock = await fetch("http://localhost:5000/redeem", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -107,22 +118,37 @@ export default function Cart() {
         })
       });
 
-      const data = await res.json();
-      if (res.ok) {
-        const updatedCart = cartItems.filter(item => !selectedItems.includes(item.id));
-        setCartItems(updatedCart);
-        localStorage.setItem("cart", JSON.stringify(updatedCart));
-        setSelectedItems([]);
-        // Optionally update user points
-        const updatedUser = { ...user, points: data.points };
+      const dataStock = await resStock.json();
+      if (!resStock.ok) return alert(dataStock.message || "Error updating stock");
+
+      // Push redeemed serials to backend
+      const resRedeemed = await fetch("http://localhost:5000/redeemed", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          userId: user._id,
+          vouchers: vouchersForBackend
+        })
+      });
+
+      const dataRedeemed = await resRedeemed.json();
+      if (!resRedeemed.ok) return alert(dataRedeemed.message || "Error saving redeemed vouchers");
+
+      // Clear cart after success
+      const updatedCart = cartItems.filter(item => !selectedItems.includes(item.id));
+      setCartItems(updatedCart);
+      localStorage.setItem("cart", JSON.stringify(updatedCart));
+      setSelectedItems([]);
+
+      if (dataStock.points) {
+        const updatedUser = { ...user, points: dataStock.points };
         setUser(updatedUser);
         localStorage.setItem("user", JSON.stringify(updatedUser));
-      } else {
-        alert(data.message);
       }
+
     } catch (err) {
       console.error(err);
-      alert("Error while redeeming vouchers.");
+      alert("Something went wrong while redeeming vouchers.");
     }
   };
 
