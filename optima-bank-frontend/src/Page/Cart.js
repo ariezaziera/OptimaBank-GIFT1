@@ -48,36 +48,42 @@ export default function Cart() {
     }
   };
 
-  // ✅ Generate unique serial based on category
-  const generateSerial = (category) => {
+  // ✅ Generate unique serial tied to voucher globally
+  const generateSerial = (voucher) => {
     const prefixes = {
       Clothing: "CLTH",
       Food: "FOOD",
       Handbag: "HDBG",
       Shoes: "SHOE",
     };
-    const prefix = prefixes[category] || "GEN";
-    return `${prefix}-${Date.now()}-${Math.random()
-      .toString(36)
-      .substr(2, 5)
-      .toUpperCase()}`;
+    const prefix = prefixes[voucher.category] || "GEN";
+
+    // Use voucher ID or name hash for consistent part
+    const baseCode = (voucher.id || voucher.name)
+      .toUpperCase()
+      .replace(/\s+/g, "")
+      .substr(0, 5);
+
+    // Add random suffix for uniqueness
+    const uniquePart = Math.random().toString(36).substr(2, 5).toUpperCase();
+
+    return `${prefix}-${baseCode}-${uniquePart}`;
   };
 
-  const handleBulkRedeem = () => {
+  const handleBulkRedeem = async () => {
     if (!user) return alert("Please login first");
     if (selectedItems.length === 0) return alert("No vouchers selected");
 
-    const vouchersToRedeem = cartItems.filter((item) =>
-      selectedItems.includes(item.id)
-    );
+    const vouchersToRedeem = cartItems.filter(item => selectedItems.includes(item.id));
 
-    // Create redeemed vouchers with serials
+    // Generate serials locally
     const redeemed = [];
     vouchersToRedeem.forEach((v) => {
-      for (let i = 0; i < (v.quantity || 1); i++) {
+      const qty = v.quantity || 1;
+      for (let i = 0; i < qty; i++) {
         redeemed.push({
           ...v,
-          serial: generateSerial(v.category),
+          serial: generateSerial(v), // each serial unique globally
           redeemedAt: new Date(),
         });
       }
@@ -86,14 +92,40 @@ export default function Cart() {
     setRedeemedVouchers(redeemed);
     setShowVoucherModal(true);
 
-    // Update cart (remove redeemed)
-    const updatedCart = cartItems.filter(
-      (item) => !selectedItems.includes(item.id)
-    );
-    setCartItems(updatedCart);
-    localStorage.setItem("cart", JSON.stringify(updatedCart));
-    setSelectedItems([]);
+    try {
+      // Send to backend to update available stock
+      const res = await fetch("http://localhost:5000/redeem", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          userId: user._id,
+          vouchers: vouchersToRedeem.map(item => ({
+            _id: item._id,
+            id: item.id,
+            quantity: item.quantity || 1
+          }))
+        })
+      });
+
+      const data = await res.json();
+      if (res.ok) {
+        const updatedCart = cartItems.filter(item => !selectedItems.includes(item.id));
+        setCartItems(updatedCart);
+        localStorage.setItem("cart", JSON.stringify(updatedCart));
+        setSelectedItems([]);
+        // Optionally update user points
+        const updatedUser = { ...user, points: data.points };
+        setUser(updatedUser);
+        localStorage.setItem("user", JSON.stringify(updatedUser));
+      } else {
+        alert(data.message);
+      }
+    } catch (err) {
+      console.error(err);
+      alert("Error while redeeming vouchers.");
+    }
   };
+
 
   return (
     <>
@@ -221,11 +253,13 @@ export default function Cart() {
                   : "grid-cols-3";
 
               return (
-                <div className={`voucher-grid grid ${gridCols} gap-4`}>
+                <div
+                  className="voucher-grid flex flex-wrap justify-center gap-4"
+                >
                   {groupedVouchers.map((v, i) => (
                     <div
                       key={i}
-                      className="voucher-card border p-4 rounded-lg text-center shadow break-inside-avoid"
+                      className="voucher-card border p-4 rounded-lg text-center shadow flex-1 min-w-[200px] max-w-[250px]"
                     >
                       <img
                         src={v.image}
@@ -251,6 +285,7 @@ export default function Cart() {
                     </div>
                   ))}
                 </div>
+
               );
             })()}
 
