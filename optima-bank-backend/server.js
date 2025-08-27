@@ -302,14 +302,30 @@ app.post('/redeem', async (req, res) => {
       dbVoucher.available -= v.quantity;
       await dbVoucher.save();
 
-      user.rewards.push({
-        id: dbVoucher._id,
-        name: dbVoucher.name,
-        image: dbVoucher.image,
-        price: dbVoucher.price,
-        quantity: v.quantity,
-        redeemedAt: new Date()
-      });
+      // Check if user already has this voucher in rewards
+      let existingReward = user.rewards.find(r => r.voucherId.toString() === dbVoucher._id.toString());
+
+      if (existingReward) {
+        // Just add new serials into the existing one
+        v.serials.forEach(code => {
+          existingReward.serials.push({
+            code,
+            redeemedAt: new Date()
+          });
+        });
+      } else {
+        // Create new reward object
+        user.rewards.push({
+          voucherId: dbVoucher._id,
+          name: dbVoucher.name,
+          image: dbVoucher.image,
+          price: dbVoucher.price,
+          serials: v.serials.map(code => ({
+            code,
+            redeemedAt: new Date()
+          }))
+        });
+      }
     }
 
     await user.save();
@@ -320,7 +336,6 @@ app.post('/redeem', async (req, res) => {
     res.status(500).json({ message: "Server error" });
   }
 });
-
 
 
 const Voucher = require('./models/Voucher'); // Create this model

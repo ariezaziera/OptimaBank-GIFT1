@@ -140,22 +140,28 @@ const Voucher = () => {
           {filteredVouchers.map(voucher => (
             <div
               key={voucher._id || voucher.id}
-              className={`bg-white rounded-2xl shadow-lg p-4 hover:shadow-2xl hover:shadow-cyan-900/40 transform hover:-translate-y-1 transition-all duration-300 ${
-                voucher.available === 0 ? 'opacity-50 pointer-events-none' : ''
-              }`}
+              className={`bg-white rounded-2xl shadow-lg p-4 flex flex-col justify-between 
+                          hover:shadow-2xl hover:shadow-cyan-900/40 transform hover:-translate-y-1 
+                          transition-all duration-300 ${
+                            voucher.available === 0 ? 'opacity-50 pointer-events-none' : ''
+                          }`}
             >
-              <img
-                src={voucher.image}
-                alt={voucher.name}
-                onClick={() => setSelectedVoucher(voucher)}
-                className="w-full aspect-square object-cover rounded-xl mb-4 cursor-pointer hover:scale-105 transition-transform duration-300"
-              />
-              <h3 className="text-xl font-bold text-cyan-950 mb-1">{voucher.name}</h3>
-              <p className="text-sm text-gray-500 mb-1">Category: {voucher.category}</p>
-              <p className="text-gray-700 font-medium mb-1">Price: {voucher.price} pts</p>
-              <p className="text-red-600 font-semibold mb-3">Available: {voucher.available}</p>
+              {/* Top Section: Image + Info */}
+              <div>
+                <img
+                  src={voucher.image}
+                  alt={voucher.name}
+                  onClick={() => setSelectedVoucher(voucher)}
+                  className="w-full aspect-square object-cover rounded-xl mb-4 cursor-pointer hover:scale-105 transition-transform duration-300"
+                />
+                <h3 className="text-xl font-bold text-cyan-950 mb-1">{voucher.name}</h3>
+                <p className="text-sm text-gray-500 mb-1">Category: {voucher.category}</p>
+                <p className="text-gray-700 font-medium mb-1">Price: {voucher.price} pts</p>
+                <p className="text-red-600 font-semibold">Available: {voucher.available}</p>
+              </div>
 
-              <div className="flex gap-2">
+              {/* Bottom Section: Buttons */}
+              <div className="flex gap-2 mt-4">
                 <button
                   onClick={() => setSelectedVoucher(voucher)}
                   disabled={voucher.available === 0}
@@ -197,31 +203,29 @@ const Voucher = () => {
             </button>
 
             {/* Grid Layout */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-0 p-12">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 p-8 md:p-12">
               {/* Left: Image */}
-              <div>
+              <div className="flex justify-center items-center">
                 <img
                   src={selectedVoucher.image}
                   alt={selectedVoucher.name}
-                  className="w-full h-full md:w-96 md:h-96 object-cover rounded-xl"
+                  className="w-full max-w-sm h-auto object-cover rounded-xl shadow-md"
                 />
               </div>
 
               {/* Right: Details */}
-              <div className="flex flex-col">
-                <h2 className="text-2xl font-bold mb-2 text-cyan-950">
+              <div className="flex flex-col md:pl-6">
+                <h2 className="text-2xl font-bold mb-3 text-cyan-950">
                   {selectedVoucher.name}
                 </h2>
-                <p className="text-gray-500 mb-1">
-                  Category: {selectedVoucher.category}
-                </p>
+                <p className="text-gray-500 mb-1">Category: {selectedVoucher.category}</p>
                 <p className="mb-2 font-semibold text-gray-700">
                   Price: {selectedVoucher.price} pts
                 </p>
-                <p className="text-gray-600 mb-2">
+                <p className="text-gray-600 mb-3">
                   <strong>Description:</strong> {selectedVoucher.description}
                 </p>
-                <p className="text-gray-600 mb-4">
+                <p className="text-gray-600 mb-6">
                   <strong>Terms & Conditions:</strong> {selectedVoucher.terms}
                 </p>
 

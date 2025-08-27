@@ -105,18 +105,16 @@ export default function Cart() {
 
     try {
       // Update stock
+      // Update stock + save to user
       const resStock = await fetch("http://localhost:5000/redeem", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           userId: user._id,
-          vouchers: vouchersToRedeem.map(item => ({
-            _id: item._id,
-            id: item.id,
-            quantity: item.quantity || 1
-          }))
+          vouchers: vouchersForBackend   // ✅ already has serials
         })
       });
+
 
       const dataStock = await resStock.json();
       if (!resStock.ok) return alert(dataStock.message || "Error updating stock");
