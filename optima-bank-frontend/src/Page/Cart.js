@@ -2,6 +2,8 @@
 import React, { useEffect, useState } from "react";
 import Navbar from "../Navbar";
 import "../index.css"; // ✅ ensure print styles are included
+import Barcode from "react-barcode";
+
 
 export default function Cart() {
   const [cartItems, setCartItems] = useState([]);
@@ -24,6 +26,19 @@ export default function Cart() {
     );
     setCartItems(newCart);
     localStorage.setItem("cart", JSON.stringify(newCart));
+  };
+
+  const handleLogout = async () => {
+    if (!window.confirm("Are you sure you want to logout?")) return;
+    try {
+      const res = await fetch('http://localhost:5000/logout', { method: 'GET', credentials: 'include' });
+      if (res.ok) {
+        localStorage.removeItem('user');
+        window.location.href = 'http://localhost:3000/';
+      } else console.error('Logout failed:', await res.json());
+    } catch (err) {
+      console.error('Logout failed:', err);
+    }
   };
 
   const handleRemoveFromCart = (id) => {
@@ -155,7 +170,7 @@ export default function Cart() {
     <>
       {/* ✅ Navbar hidden in print */}
       <div className="no-print">
-        <Navbar user={user} />
+      <Navbar user={user} handleLogout={handleLogout} />
       </div>
 
       <div className="pt-28 px-6 max-w-6xl mx-auto min-h-screen mb-10">
@@ -250,8 +265,8 @@ export default function Cart() {
 
       {/* ✅ Voucher Popup Modal */}
       {showVoucherModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center overflow-auto">
-          <div className="bg-white p-6 rounded-lg max-w-6xl w-full">
+        <div className="fixed inset-0 bg-black/30 backdrop-blur-sm flex justify-center items-center overflow-auto pt-14">
+          <div className="bg-white p-6 px-12 rounded-lg max-w-2xl w-auto">
             <h2 className="text-xl font-bold mb-4 text-center">
               🎟️ Your Redeemed Vouchers
             </h2>
@@ -276,41 +291,66 @@ export default function Cart() {
                   ? "grid-cols-2"
                   : "grid-cols-3";
 
-              return (
-                <div
-                  className="voucher-grid flex flex-wrap justify-center gap-4"
-                >
-                  {groupedVouchers.map((v, i) => (
-                    <div
-                      key={i}
-                      className="voucher-card border p-4 rounded-lg text-center shadow flex-1 min-w-[200px] max-w-[250px]"
-                    >
+            return (
+              <div className="voucher-grid flex flex-wrap justify-center gap-4">
+                {groupedVouchers.map((v, i) => (
+                  <div
+                    key={i}
+                    className="voucher-card border p-4 rounded-lg shadow flex min-w-[300px] max-w-[600px] gap-4"
+                  >
+                    {/* Left side: image */}
+                    <div className="flex-shrink-0 flex items-center">
                       <img
                         src={v.image}
                         alt={v.name}
-                        className="mx-auto w-28 h-28 mb-3"
+                        className="w-36 h-36 object-contain"
                       />
-                      <h3 className="voucher-title font-semibold text-lg">
+                    </div>
+
+                    {/* Right side: details */}
+                    <div className="flex-1">
+                      <h3 className="voucher-title font-semibold text-lg mb-2">
                         {v.name} (x{v.serials.length})
                       </h3>
-                      <div className="voucher-details flex flex-wrap justify-center gap-1 mt-2">
+
+                      <div className="text-sm text-gray-700 space-y-1 mb-3">
+                        <p>
+                          <span className="font-semibold">Points:</span> {v.price}
+                        </p>
+                        {v.description && (
+                          <p>
+                            <span className="font-semibold">Description:</span>{" "}
+                            {v.description}
+                          </p>
+                        )}
+                        {v.terms && (
+                          <p>
+                            <span className="font-semibold">T&amp;C:</span> {v.terms}
+                          </p>
+                        )}
+                      </div>
+
+                      <div className="voucher-details flex flex-wrap gap-2">
                         {v.serials.map((s, j) => (
-                          <span
-                            key={j}
-                            className="bg-gray-100 px-2 py-1 rounded text-xs"
-                          >
-                            {s}
-                          </span>
+                          <div key={j} className="flex flex-col items-center">
+                            <Barcode
+                              value={s}
+                              width={1.5}
+                              height={50}
+                              fontSize={12}
+                            />
+                          </div>
                         ))}
                       </div>
+
                       <p className="text-xs text-gray-500 mt-2">
-                        Redeemed at: {new Date(v.redeemedAt).toLocaleString()}
+                        Claimed at: {new Date(v.redeemedAt).toLocaleString()}
                       </p>
                     </div>
-                  ))}
-                </div>
-
-              );
+                  </div>
+                ))}
+              </div>
+            );
             })()}
 
             {/* ✅ Buttons hidden in print */}

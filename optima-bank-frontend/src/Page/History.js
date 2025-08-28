@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import Navbar from '../Navbar';
+import Swal from "sweetalert2";
 
 export default function History() {
   const [redeemedVouchers, setRedeemedVouchers] = useState([]);
@@ -25,9 +26,40 @@ export default function History() {
     }
   };
 
+  const handleLogout = async () => {
+    const result = await Swal.fire({
+      title: "Logout Confirmation",
+      text: "Are you sure you want to logout?",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#3085d6",
+      cancelButtonColor: "#d33",
+      confirmButtonText: "Yes, logout",
+      cancelButtonText: "Cancel",
+    });
+
+    if (!result.isConfirmed) return;
+
+    try {
+      const res = await fetch("http://localhost:5000/logout", {
+        method: "GET",
+        credentials: "include",
+      });
+
+      if (res.ok) {
+        localStorage.removeItem("user");
+        window.location.href = "http://localhost:3000/";
+      } else {
+        console.error("Logout failed:", await res.json());
+      }
+    } catch (err) {
+      console.error("Logout failed:", err);
+    }
+  };
+
   return (
     <>
-      <Navbar user={user} />
+      <Navbar user={user} handleLogout={handleLogout} />
       <div className="pt-24 px-6 max-w-6xl mx-auto">
         <h2 className="text-3xl font-bold mb-6 text-center">Redeem History</h2>
 
