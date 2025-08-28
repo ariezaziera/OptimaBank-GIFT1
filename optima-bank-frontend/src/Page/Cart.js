@@ -4,7 +4,6 @@ import Navbar from "../Navbar";
 import "../index.css"; // ✅ ensure print styles are included
 import Barcode from "react-barcode";
 
-
 export default function Cart() {
   const [cartItems, setCartItems] = useState([]);
   const [user, setUser] = useState(null);
@@ -31,13 +30,16 @@ export default function Cart() {
   const handleLogout = async () => {
     if (!window.confirm("Are you sure you want to logout?")) return;
     try {
-      const res = await fetch('http://localhost:5000/logout', { method: 'GET', credentials: 'include' });
+      const res = await fetch("http://localhost:5000/logout", {
+        method: "GET",
+        credentials: "include",
+      });
       if (res.ok) {
-        localStorage.removeItem('user');
-        window.location.href = 'http://localhost:3000/';
-      } else console.error('Logout failed:', await res.json());
+        localStorage.removeItem("user");
+        window.location.href = "http://localhost:3000/";
+      } else console.error("Logout failed:", await res.json());
     } catch (err) {
-      console.error('Logout failed:', err);
+      console.error("Logout failed:", err);
     }
   };
 
@@ -73,35 +75,56 @@ export default function Cart() {
     };
     const prefix = prefixes[voucher.category] || "GEN";
 
-    // Use voucher ID or name hash for consistent part
     const baseCode = (voucher.id || voucher.name)
       .toUpperCase()
       .replace(/\s+/g, "")
       .substr(0, 5);
 
-    // Add random suffix for uniqueness
     const uniquePart = Math.random().toString(36).substr(2, 5).toUpperCase();
 
     return `${prefix}-${baseCode}-${uniquePart}`;
+  };
+
+  // ✅ Helper: calculate total cost
+  const getTotalCost = () => {
+    return cartItems
+      .filter((item) => selectedItems.includes(item.id))
+      .reduce(
+        (sum, item) => sum + item.price * (item.quantity || 1),
+        0
+      );
   };
 
   const handleBulkRedeem = async () => {
     if (!user) return alert("Please login first");
     if (selectedItems.length === 0) return alert("No vouchers selected");
 
-    const vouchersToRedeem = cartItems.filter(item => selectedItems.includes(item.id));
+    const vouchersToRedeem = cartItems.filter((item) =>
+      selectedItems.includes(item.id)
+    );
 
-    // Generate serials **once**
+    const totalCost = getTotalCost();
+
+    // ✅ Check points before generating voucher
+    if (user.points < totalCost) {
+      return alert(
+        `Not enough points! You need ${totalCost}, but you only have ${user.points}.`
+      );
+    }
+
+    // ✅ Only generate if enough points
     const redeemedVouchersList = [];
-    const vouchersForBackend = vouchersToRedeem.map(item => {
-      const serials = Array.from({ length: item.quantity || 1 }, () => generateSerial(item));
-      
-      // Push for modal display
-      serials.forEach(s => {
+    const vouchersForBackend = vouchersToRedeem.map((item) => {
+      const serials = Array.from(
+        { length: item.quantity || 1 },
+        () => generateSerial(item)
+      );
+
+      serials.forEach((s) => {
         redeemedVouchersList.push({
           ...item,
           serial: s,
-          redeemedAt: new Date()
+          redeemedAt: new Date(),
         });
       });
 
@@ -111,7 +134,7 @@ export default function Cart() {
         name: item.name,
         category: item.category,
         quantity: item.quantity || 1,
-        serials
+        serials,
       };
     });
 
@@ -119,36 +142,36 @@ export default function Cart() {
     setShowVoucherModal(true);
 
     try {
-      // Update stock
-      // Update stock + save to user
       const resStock = await fetch("http://localhost:5000/redeem", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           userId: user._id,
-          vouchers: vouchersForBackend   // ✅ already has serials
-        })
+          vouchers: vouchersForBackend,
+        }),
       });
 
-
       const dataStock = await resStock.json();
-      if (!resStock.ok) return alert(dataStock.message || "Error updating stock");
+      if (!resStock.ok)
+        return alert(dataStock.message || "Error updating stock");
 
-      // Push redeemed serials to backend
       const resRedeemed = await fetch("http://localhost:5000/redeemed", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           userId: user._id,
-          vouchers: vouchersForBackend
-        })
+          vouchers: vouchersForBackend,
+        }),
       });
 
       const dataRedeemed = await resRedeemed.json();
-      if (!resRedeemed.ok) return alert(dataRedeemed.message || "Error saving redeemed vouchers");
+      if (!resRedeemed.ok)
+        return alert(dataRedeemed.message || "Error saving redeemed vouchers");
 
-      // Clear cart after success
-      const updatedCart = cartItems.filter(item => !selectedItems.includes(item.id));
+      // ✅ Clear cart
+      const updatedCart = cartItems.filter(
+        (item) => !selectedItems.includes(item.id)
+      );
       setCartItems(updatedCart);
       localStorage.setItem("cart", JSON.stringify(updatedCart));
       setSelectedItems([]);
@@ -158,19 +181,17 @@ export default function Cart() {
         setUser(updatedUser);
         localStorage.setItem("user", JSON.stringify(updatedUser));
       }
-
     } catch (err) {
       console.error(err);
       alert("Something went wrong while redeeming vouchers.");
     }
   };
 
-
   return (
     <>
       {/* ✅ Navbar hidden in print */}
       <div className="no-print">
-      <Navbar user={user} handleLogout={handleLogout} />
+        <Navbar user={user} handleLogout={handleLogout} />
       </div>
 
       <div className="pt-28 px-6 max-w-6xl mx-auto min-h-screen mb-10">
@@ -234,7 +255,10 @@ export default function Cart() {
                           max="3"
                           value={item.quantity || 1}
                           onChange={(e) =>
-                            handleQuantityChange(item.id, Number(e.target.value))
+                            handleQuantityChange(
+                              item.id,
+                              Number(e.target.value)
+                            )
                           }
                           className="w-20 border rounded-lg px-3 py-1.5 focus:ring-2 focus:ring-cyan-500"
                         />
@@ -254,10 +278,31 @@ export default function Cart() {
             <div className="mt-10 text-center">
               <button
                 onClick={handleBulkRedeem}
-                className="bg-green-600 text-white px-8 py-3 rounded-2xl text-lg font-semibold hover:bg-green-700 transition"
+                disabled={
+                  selectedItems.length === 0 ||
+                  !user ||
+                  user.points < getTotalCost()
+                }
+                className={`px-8 py-3 rounded-2xl text-lg font-semibold transition 
+                  ${
+                    selectedItems.length === 0 ||
+                    !user ||
+                    user.points < getTotalCost()
+                      ? "bg-gray-400 text-gray-200 cursor-not-allowed"
+                      : "bg-green-600 text-white hover:bg-green-700"
+                  }`}
               >
-                ✅ Redeem Selected
+                 Redeem Now
               </button>
+
+              {user &&
+                selectedItems.length > 0 &&
+                user.points < getTotalCost() && (
+                  <p className="text-sm text-red-500 mt-2">
+                    Not enough points. You need {getTotalCost()} points but only
+                    have {user.points}.
+                  </p>
+                )}
             </div>
           </>
         )}
@@ -272,7 +317,6 @@ export default function Cart() {
             </h2>
 
             {(() => {
-              // Group vouchers by name
               const grouped = {};
               redeemedVouchers.forEach((v) => {
                 if (!grouped[v.name]) {
@@ -283,74 +327,72 @@ export default function Cart() {
 
               const groupedVouchers = Object.values(grouped);
 
-              // ✅ responsive columns
-              const gridCols =
-                groupedVouchers.length === 1
-                  ? "grid-cols-1"
-                  : groupedVouchers.length === 2
-                  ? "grid-cols-2"
-                  : "grid-cols-3";
+              return (
+                <div className="voucher-grid flex flex-wrap justify-center gap-4">
+                  {groupedVouchers.map((v, i) => (
+                    <div
+                      key={i}
+                      className="voucher-card border p-4 rounded-lg shadow flex min-w-[300px] max-w-[600px] gap-4"
+                    >
+                      <div className="flex-shrink-0 flex items-center">
+                        <img
+                          src={v.image}
+                          alt={v.name}
+                          className="w-36 h-36 object-contain"
+                        />
+                      </div>
 
-            return (
-              <div className="voucher-grid flex flex-wrap justify-center gap-4">
-                {groupedVouchers.map((v, i) => (
-                  <div
-                    key={i}
-                    className="voucher-card border p-4 rounded-lg shadow flex min-w-[300px] max-w-[600px] gap-4"
-                  >
-                    {/* Left side: image */}
-                    <div className="flex-shrink-0 flex items-center">
-                      <img
-                        src={v.image}
-                        alt={v.name}
-                        className="w-36 h-36 object-contain"
-                      />
-                    </div>
+                      <div className="flex-1">
+                        <h3 className="voucher-title font-semibold text-lg mb-2">
+                          {v.name} (x{v.serials.length})
+                        </h3>
 
-                    {/* Right side: details */}
-                    <div className="flex-1">
-                      <h3 className="voucher-title font-semibold text-lg mb-2">
-                        {v.name} (x{v.serials.length})
-                      </h3>
+                        <div className="text-sm text-gray-700 space-y-1 mb-3">
+                          <p>
+                            <span className="font-semibold">Points:</span>{" "}
+                            {v.price}
+                          </p>
+                          {v.description && (
+                            <p>
+                              <span className="font-semibold">
+                                Description:
+                              </span>{" "}
+                              {v.description}
+                            </p>
+                          )}
+                          {v.terms && (
+                            <p>
+                              <span className="font-semibold">T&amp;C:</span>{" "}
+                              {v.terms}
+                            </p>
+                          )}
+                        </div>
 
-                      <div className="text-sm text-gray-700 space-y-1 mb-3">
-                        <p>
-                          <span className="font-semibold">Points:</span> {v.price}
+                        <div className="voucher-details flex flex-wrap gap-2">
+                          {v.serials.map((s, j) => (
+                            <div
+                              key={j}
+                              className="flex flex-col items-center"
+                            >
+                              <Barcode
+                                value={s}
+                                width={1.5}
+                                height={50}
+                                fontSize={12}
+                              />
+                            </div>
+                          ))}
+                        </div>
+
+                        <p className="text-xs text-gray-500 mt-2">
+                          Claimed at:{" "}
+                          {new Date(v.redeemedAt).toLocaleString()}
                         </p>
-                        {v.description && (
-                          <p>
-                            <span className="font-semibold">Description:</span>{" "}
-                            {v.description}
-                          </p>
-                        )}
-                        {v.terms && (
-                          <p>
-                            <span className="font-semibold">T&amp;C:</span> {v.terms}
-                          </p>
-                        )}
                       </div>
-
-                      <div className="voucher-details flex flex-wrap gap-2">
-                        {v.serials.map((s, j) => (
-                          <div key={j} className="flex flex-col items-center">
-                            <Barcode
-                              value={s}
-                              width={1.5}
-                              height={50}
-                              fontSize={12}
-                            />
-                          </div>
-                        ))}
-                      </div>
-
-                      <p className="text-xs text-gray-500 mt-2">
-                        Claimed at: {new Date(v.redeemedAt).toLocaleString()}
-                      </p>
                     </div>
-                  </div>
-                ))}
-              </div>
-            );
+                  ))}
+                </div>
+              );
             })()}
 
             {/* ✅ Buttons hidden in print */}
