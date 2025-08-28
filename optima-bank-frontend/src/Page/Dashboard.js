@@ -10,6 +10,7 @@ const Dashboard = () => {
   const [user, setUser] = useState(null);
   const [showPointsPopup, setShowPointsPopup] = useState(false);
   const [currentPromo, setCurrentPromo] = useState(0);
+  const [latestVouchers, setLatestVouchers] = useState([]); // ✅ new state
   const navigate = useNavigate();
   const sliderRef = useRef(null);
 
@@ -64,6 +65,21 @@ const Dashboard = () => {
     }
   }, []);
 
+  // ✅ Fetch vouchers for promotions
+  useEffect(() => {
+    const fetchVouchers = async () => {
+      try {
+        const res = await fetch("http://localhost:5000/voucher");
+        const data = await res.json();
+        // take latest 3 vouchers
+        setLatestVouchers(data.slice(-3));
+      } catch (err) {
+        console.error("Failed to fetch vouchers:", err);
+      }
+    };
+    fetchVouchers();
+  }, []);
+
   const handleLogout = async () => {
     const confirmLogout = window.confirm("Are you sure you want to logout?");
     if (!confirmLogout) return;
@@ -86,8 +102,8 @@ const Dashboard = () => {
   };
 
   // Slider settings
-    const sliderSettings = {
-    dots: false, // ✅ hide default slick dots
+  const sliderSettings = {
+    dots: false,
     infinite: true,
     speed: 600,
     slidesToShow: 1,
@@ -95,7 +111,7 @@ const Dashboard = () => {
     autoplay: true,
     autoplaySpeed: 4000,
     arrows: false,
-    beforeChange: (_, next) => setCurrentPromo(next), // sync current slide
+    beforeChange: (_, next) => setCurrentPromo(next),
   };
 
   const promoBanners = [
@@ -109,26 +125,26 @@ const Dashboard = () => {
     <div className="min-h-screen relative">
       <Navbar user={user} handleLogout={handleLogout} />
 
-      {/* Slider as background */}
+      {/* Background slider */}
       <div className="absolute inset-0 -z-10">
-          <Slider ref={sliderRef} {...sliderSettings}>
-            {promoBanners.map((promo, index) => (
-              <div
-                key={index}
-                className="h-screen w-full cursor-pointer"
-                onClick={() => navigate(`/voucher?category=${promo.category}`)}
-              >
-                <img
-                  src={promo.img}
-                  alt={promo.category}
-                  className="w-full h-screen object-cover brightness-75"
-                />
-              </div>
-            ))}
-          </Slider>
+        <Slider ref={sliderRef} {...sliderSettings}>
+          {promoBanners.map((promo, index) => (
+            <div
+              key={index}
+              className="h-screen w-full cursor-pointer"
+              onClick={() => navigate(`/voucher?category=${promo.category}`)}
+            >
+              <img
+                src={promo.img}
+                alt={promo.category}
+                className="w-full h-screen object-cover brightness-75"
+              />
+            </div>
+          ))}
+        </Slider>
       </div>
 
-            {/* Overlay partition */}
+      {/* Overlay partition */}
       <main className="flex flex-col items-center justify-center min-h-screen text-center">
         <div className="bg-white text-gray-900 p-12 rounded-3xl shadow-2xl max-w-2xl w-full">
           <h2 className="text-3xl font-bold mb-4">
@@ -162,26 +178,55 @@ const Dashboard = () => {
             {promoBanners[currentPromo].statement}
           </div>
 
-            {/* ✅ Custom dots below promo statement */}
-            <div className="flex justify-center mt-6 gap-2">
-              {promoBanners.map((_, index) => (
-                <button
-                  key={index}
-                  onClick={() => {
-                    setCurrentPromo(index);
-                    sliderRef.current.slickGoTo(index); // ✅ move background too
-                  }}
-                  className={`h-3 w-3 rounded-full transition ${
-                    currentPromo === index ? "bg-blue-600 scale-125" : "bg-gray-400"
-                  }`}
-                />
-              ))}
-            </div>
+          {/* ✅ Custom dots */}
+          <div className="flex justify-center mt-6 gap-2">
+            {promoBanners.map((_, index) => (
+              <button
+                key={index}
+                onClick={() => {
+                  setCurrentPromo(index);
+                  sliderRef.current.slickGoTo(index);
+                }}
+                className={`h-3 w-3 rounded-full transition ${
+                  currentPromo === index ? "bg-blue-600 scale-125" : "bg-gray-400"
+                }`}
+              />
+            ))}
+          </div>
         </div>
       </main>
 
+      {/* ✅ Latest Vouchers Section */}
+      {latestVouchers.length > 0 && (
+        <section className="relative z-10 bg-white py-12 px-6 md:px-16">
+          <h2 className="text-2xl font-bold text-gray-900 mb-6 text-center">
+            🎁 Latest Vouchers
+          </h2>
 
-      {/* ✅ Welcome Points Popup */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+            {latestVouchers.map(voucher => (
+              <div
+                key={voucher._id || voucher.id}
+                className="bg-white rounded-2xl shadow-lg overflow-hidden hover:shadow-2xl transition transform hover:-translate-y-1 cursor-pointer"
+                onClick={() => navigate("/voucher")}
+              >
+                <img
+                  src={voucher.image}
+                  alt={voucher.name}
+                  className="w-full h-48 object-cover"
+                />
+                <div className="p-4">
+                  <h3 className="text-lg font-bold text-cyan-950">{voucher.name}</h3>
+                  <p className="text-sm text-gray-500">Category: {voucher.category}</p>
+                  <p className="text-gray-700 font-medium">Price: {voucher.price} pts</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
+
+      {/* Welcome Popup */}
       {showPointsPopup && user && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center">
           <div className="relative bg-white w-11/12 max-w-sm p-6 rounded-2xl shadow-xl text-center">
