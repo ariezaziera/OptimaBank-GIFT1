@@ -428,7 +428,7 @@ export default function Cart() {
             <div className="no-print text-center mt-6">
               <button
                 onClick={() => exportClaimedVouchersPDF(redeemedVouchers)}
-                className="bg-blue-600 text-white px-4 py-2 rounded mr-2"
+                className="bg-yellow-600 text-white px-4 py-2 rounded mr-2"
               >
                 Download PDF
               </button>
