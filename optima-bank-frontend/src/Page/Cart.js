@@ -5,6 +5,7 @@ import "../index.css";
 import Barcode from "react-barcode";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable"; // ✅ proper import
+import JsBarcode from "jsbarcode";
 
 export default function Cart() {
   const [cartItems, setCartItems] = useState([]);
@@ -21,32 +22,74 @@ export default function Cart() {
     setCartItems(cart);
   }, []);
 
-  const exportClaimedVouchersPDF = (claimedVouchers) => {
-    const doc = new jsPDF();
+const toBase64 = (url) =>
+  fetch(url)
+    .then((res) => res.blob())
+    .then(
+      (blob) =>
+        new Promise((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onloadend = () => resolve(reader.result);
+          reader.onerror = reject;
+          reader.readAsDataURL(blob);
+        })
+    );
 
-    doc.text("Claimed Vouchers", 14, 15);
+const generateBarcodeBase64 = (text) => {
+  const canvas = document.createElement("canvas");
+  JsBarcode(canvas, text, { format: "CODE128", width: 2, height: 50 });
+  return canvas.toDataURL("image/png");
+};
 
-    const tableColumn = ["Name", "Category", "Price (pts)", "Date Claimed"];
-    const tableRows = [];
+const exportClaimedVouchersPDF = async (claimedVouchers) => {
+  const doc = new jsPDF();
 
-    claimedVouchers.forEach(voucher => {
-      const row = [
-        voucher.name,
-        voucher.category,
-        voucher.price,
-        new Date(voucher.claimedAt).toLocaleDateString()
-      ];
-      tableRows.push(row);
-    });
+  doc.setFontSize(20);
+  doc.setTextColor(40, 40, 90);
+  doc.text("Your Redeemed Vouchers", 14, 20);
 
-    autoTable(doc, {   // ✅ pass doc as first argument
-      head: [tableColumn],
-      body: tableRows,
-      startY: 25,
-    });
+  let y = 30;
 
-    doc.save("claimed-vouchers.pdf");
-  };
+  for (let i = 0; i < claimedVouchers.length; i++) {
+    const v = claimedVouchers[i];
+    const imgBase64 = v.image ? await toBase64(v.image) : null;
+    const barcodeBase64 = v.serial ? generateBarcodeBase64(v.serial) : null;
+
+    // 🟡 Card background with light fill
+    doc.setFillColor(255, 255, 255); // light pastel
+    doc.setDrawColor(200, 200, 200); // soft border
+    doc.roundedRect(10, y, 190, 67, 5, 5, "FD"); // Fill + Draw
+
+    // 🖼️ Voucher Image
+    if (imgBase64) {
+      doc.addImage(imgBase64, "JPEG", 14, y + 8, 40, 40);
+    }
+
+    // 📋 Voucher details
+    doc.setTextColor(30, 30, 30);
+    doc.setFontSize(14);
+    doc.text(v.name, 60, y + 15); // Title bold
+    doc.setFontSize(11);
+    doc.setTextColor(80, 80, 80);
+    doc.text(`Category: ${v.category}`, 60, y + 25);
+    doc.text(`Price: ${v.price} pts`, 60, y + 33);
+
+    // 📦 Barcode (highlighted section)
+    if (barcodeBase64) {
+      doc.addImage(barcodeBase64, "PNG", 60, y + 45, 90, 20);
+    }
+
+    // Move Y for next card
+    y += 78;
+
+    if (y > 250) {
+      doc.addPage();
+      y = 20;
+    }
+  }
+
+  doc.save("claimed-vouchers.pdf");
+};
 
   const handleQuantityChange = (id, quantity) => {
     const newCart = cartItems.map((item) =>
@@ -339,9 +382,9 @@ export default function Cart() {
 
       {/* ✅ Voucher Popup Modal */}
       {showVoucherModal && (
-        <div className="fixed inset-0 bg-black/30 backdrop-blur-sm flex justify-center items-center overflow-auto pt-14">
-          <div className="bg-white p-6 px-12 rounded-lg max-w-2xl w-auto">
-            <h2 className="text-xl font-bold mb-4 text-center">
+        <div className="fixed inset-0 bg-black/30 backdrop-blur-sm flex justify-center items-center overflow-auto pt-14 px-4">
+          <div className="bg-white p-4 sm:p-6 md:px-12 rounded-lg w-full max-w-2xl max-h-[85vh] overflow-y-auto">
+            <h2 className="text-lg sm:text-xl font-bold mb-4 text-center">
               🎟️ Your Redeemed Vouchers
             </h2>
 
@@ -357,35 +400,34 @@ export default function Cart() {
               const groupedVouchers = Object.values(grouped);
 
               return (
-                <div className="voucher-grid flex flex-wrap justify-center gap-4">
+                <div className="voucher-grid flex flex-col sm:flex-row sm:flex-wrap justify-center gap-4">
                   {groupedVouchers.map((v, i) => (
                     <div
                       key={i}
-                      className="voucher-card border p-4 rounded-lg shadow flex min-w-[300px] max-w-[600px] gap-4"
+                      className="voucher-card border p-3 sm:p-4 rounded-lg shadow flex flex-col sm:flex-row w-full sm:min-w-[280px] sm:max-w-[500px] gap-4"
                     >
-                      <div className="flex-shrink-0 flex items-center">
+                      {/* Image */}
+                      <div className="flex-shrink-0 flex justify-center sm:justify-start">
                         <img
                           src={v.image}
                           alt={v.name}
-                          className="w-36 h-36 object-contain"
+                          className="w-28 h-28 sm:w-36 sm:h-36 object-contain"
                         />
                       </div>
 
+                      {/* Content */}
                       <div className="flex-1">
-                        <h3 className="voucher-title font-semibold text-lg mb-2">
+                        <h3 className="voucher-title font-semibold text-base sm:text-lg mb-2">
                           {v.name} (x{v.serials.length})
                         </h3>
 
-                        <div className="text-sm text-gray-700 space-y-1 mb-3">
+                        <div className="text-xs sm:text-sm text-gray-700 space-y-1 mb-3">
                           <p>
-                            <span className="font-semibold">Points:</span>{" "}
-                            {v.price}
+                            <span className="font-semibold">Points:</span> {v.price}
                           </p>
                           {v.description && (
                             <p>
-                              <span className="font-semibold">
-                                Description:
-                              </span>{" "}
+                              <span className="font-semibold">Description:</span>{" "}
                               {v.description}
                             </p>
                           )}
@@ -397,25 +439,18 @@ export default function Cart() {
                           )}
                         </div>
 
-                        <div className="voucher-details flex flex-wrap gap-2">
+                        {/* Barcodes */}
+                        <div className="voucher-details grid grid-cols-2 gap-2 max-h-28 overflow-y-auto p-2 place-items-center">
                           {v.serials.map((s, j) => (
-                            <div
-                              key={j}
-                              className="flex flex-col items-center"
-                            >
-                              <Barcode
-                                value={s}
-                                width={1.5}
-                                height={50}
-                                fontSize={12}
-                              />
+                            <div key={j}>
+                              <Barcode value={s} width={1.5} height={50} fontSize={12} />
                             </div>
                           ))}
                         </div>
 
-                        <p className="text-xs text-gray-500 mt-2">
-                          Claimed at:{" "}
-                          {new Date(v.redeemedAt).toLocaleString()}
+
+                        <p className="text-[10px] sm:text-xs text-gray-500 mt-2">
+                          Claimed at: {new Date(v.redeemedAt).toLocaleString()}
                         </p>
                       </div>
                     </div>
@@ -425,18 +460,12 @@ export default function Cart() {
             })()}
 
             {/* ✅ Buttons hidden in print */}
-            <div className="no-print text-center mt-6">
+            <div className="no-print text-center mt-6 space-x-2">
               <button
                 onClick={() => exportClaimedVouchersPDF(redeemedVouchers)}
-                className="bg-yellow-600 text-white px-4 py-2 rounded mr-2"
+                className="bg-yellow-600 text-white px-4 py-2 rounded"
               >
                 Download PDF
-              </button>
-              <button 
-                onClick={() => window.print()} 
-                className="bg-blue-600 text-white px-4 py-2 rounded mr-2" 
-              > 
-                Print Voucher 
               </button>
               <button
                 onClick={() => setShowVoucherModal(false)}

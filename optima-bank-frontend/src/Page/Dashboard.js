@@ -145,7 +145,7 @@ const Dashboard = () => {
       </div>
 
       {/* Overlay partition */}
-      <main className="flex flex-col items-center justify-center min-h-screen text-center">
+      <main className="flex flex-col items-center justify-center min-h-screen text-center p-8 pt-14">
         <div className="bg-white text-gray-900 p-12 rounded-3xl shadow-2xl max-w-2xl w-full">
           <h2 className="text-3xl font-bold mb-4">
             👋 Hello
