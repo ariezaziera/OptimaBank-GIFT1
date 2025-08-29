@@ -2,6 +2,7 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { FcGoogle } from 'react-icons/fc';
+import { AiOutlineEye, AiOutlineEyeInvisible } from "react-icons/ai";
 import Navbar from '../Navbar';
 
 export default function LoginPage() {
@@ -14,6 +15,8 @@ export default function LoginPage() {
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
+
+  const [showPassword, setShowPassword] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -73,15 +76,24 @@ export default function LoginPage() {
               value={formData.username}
               required
             />
-            <input
-              type="password"
-              name="password"
-              placeholder="Password"
-              className="w-full p-3 pl-5 rounded-3xl border-2 border-white bg-transparent text-white placeholder-white outline-none focus:ring-2 focus:ring-white"
-              onChange={handleChange}
-              value={formData.password}
-              required
-            />
+            <div className="relative">
+              <input
+                type={showPassword ? "text" : "password"}
+                name="password"
+                placeholder="Password"
+                className="w-full p-3 pl-5 pr-12 rounded-3xl border-2 border-white bg-transparent text-white placeholder-white outline-none focus:ring-2 focus:ring-white"
+                onChange={handleChange}
+                value={formData.password}
+                required
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute right-4 top-1/2 -translate-y-1/2 text-white"
+              >
+                {showPassword ? <AiOutlineEyeInvisible size={20} /> : <AiOutlineEye size={20} />}
+              </button>
+            </div>
             <div className="text-center">
               <Link to="/forgot-password" className="text-sm underline text-white hover:text-gray-200">
                 Forgot Password?

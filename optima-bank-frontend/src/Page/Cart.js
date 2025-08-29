@@ -1,8 +1,10 @@
 // src/Page/Cart.js
 import React, { useEffect, useState } from "react";
 import Navbar from "../Navbar";
-import "../index.css"; // ✅ ensure print styles are included
+import "../index.css";
 import Barcode from "react-barcode";
+import jsPDF from "jspdf";
+import autoTable from "jspdf-autotable"; // ✅ proper import
 
 export default function Cart() {
   const [cartItems, setCartItems] = useState([]);
@@ -18,6 +20,33 @@ export default function Cart() {
     const cart = JSON.parse(localStorage.getItem("cart")) || [];
     setCartItems(cart);
   }, []);
+
+  const exportClaimedVouchersPDF = (claimedVouchers) => {
+    const doc = new jsPDF();
+
+    doc.text("Claimed Vouchers", 14, 15);
+
+    const tableColumn = ["Name", "Category", "Price (pts)", "Date Claimed"];
+    const tableRows = [];
+
+    claimedVouchers.forEach(voucher => {
+      const row = [
+        voucher.name,
+        voucher.category,
+        voucher.price,
+        new Date(voucher.claimedAt).toLocaleDateString()
+      ];
+      tableRows.push(row);
+    });
+
+    autoTable(doc, {   // ✅ pass doc as first argument
+      head: [tableColumn],
+      body: tableRows,
+      startY: 25,
+    });
+
+    doc.save("claimed-vouchers.pdf");
+  };
 
   const handleQuantityChange = (id, quantity) => {
     const newCart = cartItems.map((item) =>
@@ -398,10 +427,16 @@ export default function Cart() {
             {/* ✅ Buttons hidden in print */}
             <div className="no-print text-center mt-6">
               <button
-                onClick={() => window.print()}
+                onClick={() => exportClaimedVouchersPDF(redeemedVouchers)}
                 className="bg-blue-600 text-white px-4 py-2 rounded mr-2"
               >
-                Print Voucher
+                Download PDF
+              </button>
+              <button 
+                onClick={() => window.print()} 
+                className="bg-blue-600 text-white px-4 py-2 rounded mr-2" 
+              > 
+                Print Voucher 
               </button>
               <button
                 onClick={() => setShowVoucherModal(false)}

@@ -1,77 +1,74 @@
-import React, { useState, useEffect } from 'react';
-import Navbar from '../Navbar';
+import React, { useState, useEffect } from "react";
+import Navbar from "../Navbar";
 
 const Profile = () => {
   const [formData, setFormData] = useState({
-    firstName: '',
-    lastName: '',
-    username: '',
-    password: '',
-    email: '',
-    phone: '',
-    gender: '',
-    language: '',
-    birthMonth: '',
-    birthDay: '',
-    birthYear: '',
-    address: '',
-    postcode: '',
-    country: '',
-    payment: '',
-    profileImage: null
+    firstName: "",
+    lastName: "",
+    username: "",
+    password: "",
+    email: "",
+    phone: "",
+    gender: "",
+    language: "",
+    birthMonth: "",
+    birthDay: "",
+    birthYear: "",
+    address: "",
+    postcode: "",
+    country: "",
+    payment: "",
+    profileImage: null,
   });
 
   const [user, setUser] = useState(null);
-  const [userId, setUserId] = useState('');
+  const [userId, setUserId] = useState("");
   const [imagePreview, setImagePreview] = useState(null);
 
   useEffect(() => {
-    const savedUser = JSON.parse(localStorage.getItem('user'));
+    const savedUser = JSON.parse(localStorage.getItem("user"));
     if (!savedUser) return;
     setUser(savedUser);
-  
+
     const fetchProfile = async () => {
       try {
         const res = await fetch(`http://localhost:5000/profile/${savedUser._id}`);
         const data = await res.json();
-  
+
         if (data) {
-          setFormData(prev => ({
-          ...prev,
-          ...data,
-          birthMonth: new Date(data.dob).getMonth() + 1,
-          birthDay: new Date(data.dob).getDate(),
-          birthYear: new Date(data.dob).getFullYear()
-        }));
-        setUserId(savedUser._id); // ✅ Correct MongoDB ObjectId
+          setFormData((prev) => ({
+            ...prev,
+            ...data,
+            birthMonth: new Date(data.dob).getMonth() + 1,
+            birthDay: new Date(data.dob).getDate(),
+            birthYear: new Date(data.dob).getFullYear(),
+          }));
+          setUserId(savedUser._id);
         }
       } catch (err) {
         console.error("Failed to load profile:", err);
       }
     };
-  
-    fetchProfile();
-  }, []);  
 
-  //  Logout function
+    fetchProfile();
+  }, []);
+
   const handleLogout = async () => {
     const confirmLogout = window.confirm("Are you sure you want to logout?");
     if (!confirmLogout) return;
 
     try {
-      const res = await fetch('http://localhost:5000/logout', {
-        method: 'GET',
-        credentials: 'include',
+      const res = await fetch("http://localhost:5000/logout", {
+        method: "GET",
+        credentials: "include",
       });
 
       if (res.ok) {
-        localStorage.removeItem('user');
-        window.location.href = 'http://localhost:3000/';
-      } else {
-        console.error('Logout failed:', await res.json());
+        localStorage.removeItem("user");
+        window.location.href = "http://localhost:3000/";
       }
     } catch (err) {
-      console.error('Logout failed:', err);
+      console.error("Logout failed:", err);
     }
   };
 
@@ -89,25 +86,28 @@ const Profile = () => {
     try {
       const updatedData = { ...formData };
       if (formData.birthYear && formData.birthMonth && formData.birthDay) {
-        updatedData.dob = new Date(`${formData.birthYear}-${formData.birthMonth}-${formData.birthDay}`);
+        updatedData.dob = new Date(
+          `${formData.birthYear}-${formData.birthMonth}-${formData.birthDay}`
+        );
       }
       const form = new FormData();
       for (const key in updatedData) {
-        if (key !== 'profileImage') {
+        if (key !== "profileImage") {
           form.append(key, updatedData[key]);
         }
       }
 
-      console.log("formData.profileImage =", formData.profileImage);
-
       if (formData.profileImage instanceof File) {
-        form.append('profileImage', formData.profileImage);
+        form.append("profileImage", formData.profileImage);
       }
 
-      const res = await fetch(`http://localhost:5000/profile/update/${userId}`, {
-        method: 'PUT',
-        body: form
-      });
+      const res = await fetch(
+        `http://localhost:5000/profile/update/${userId}`,
+        {
+          method: "PUT",
+          body: form,
+        }
+      );
 
       if (res.ok) alert("Profile updated!");
       else alert("Update failed");
@@ -117,160 +117,168 @@ const Profile = () => {
   };
 
   return (
-    <div className="min-h-screen  pt-24" 
+    <div
+      className="min-h-screen pt-24 bg-cover bg-center"
       style={{ backgroundImage: "url('/bgprofile.png')" }}
     >
-    {/* Keep Navbar fixed to top */}
-    <div className="fixed top-0 left-0 w-full z-10 bg-white shadow">
-      <Navbar user={user} handleLogout={handleLogout} />
-    </div>
-
-    {/* Page Content */}
-    <div className="max-w-7xl mx-auto px-6">
-      <div className="flex justify-between items-center mb-6">
-        <h2 className="text-3xl font-bold">
-          My Profile <span className="text-gray-500 font-normal">→ Edit Profile</span>
-        </h2>
-        <button
-          className="bg-blue-500 text-white px-6 py-2 rounded-full font-semibold"
-          onClick={handleSave}
-        >
-          Save
-        </button>
+      {/* Navbar */}
+      <div className="fixed top-0 left-0 w-full z-10 bg-white shadow">
+        <Navbar user={user} handleLogout={handleLogout} />
       </div>
 
-    <div className="max-w-7xl mx-auto bg-cyan-950 opacity-70 rounded-3xl shadow-lg p-10 relative">
-        <div className="flex items-center gap-8 mb-8">
-          <div>
-            <input type="file" onChange={handleImageChange} accept="image/*" />
-            <img
-              src={
-                imagePreview ||
-                (formData.profileImage?.startsWith('/uploads')
-                  ? `http://localhost:5000${formData.profileImage}`
-                  : formData.profileImage) || "/default-profile.png"
-              }
-              alt="User"
-              className="w-24 h-24 rounded-full object-cover mt-2"
-            />
+      {/* Page Content */}
+      <div className="max-w-6xl mx-auto px-4 pb-24 sm:mb-24">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
+          <h2 className="text-2xl sm:text-3xl font-bold text-gray-800">
+            My Profile <span className="text-gray-400 font-normal">→ Edit</span>
+          </h2>
+          <button
+            className="w-full sm:w-auto bg-cyan-700 hover:bg-cyan-800 transition px-6 py-3 rounded-xl text-white font-semibold shadow-md"
+            onClick={handleSave}
+          >
+            Save Changes
+          </button>
+        </div>
+
+        {/* Profile Card */}
+        <div className="bg-cyan-950/50 backdrop-blur-lg rounded-3xl shadow-xl p-5 sm:p-24 text-white">
+          {/* Header */}
+          <div className="flex flex-col sm:flex-row items-center sm:items-start gap-6 sm:gap-8 mb-8">
+            {/* Profile Image */}
+            <div className="relative">
+              <img
+                src={
+                  imagePreview ||
+                  (formData.profileImage?.startsWith("/uploads")
+                    ? `http://localhost:5000${formData.profileImage}`
+                    : formData.profileImage) || "/default-profile.png"
+                }
+                alt="User"
+                className="w-24 h-24 sm:w-28 sm:h-28 rounded-full object-cover border-4 border-cyan-600 shadow-lg"
+              />
+              <label className="absolute bottom-2 right-2 bg-cyan-700 hover:bg-cyan-800 px-3 py-1 rounded-full text-xs cursor-pointer shadow-md">
+                Upload
+                <input
+                  type="file"
+                  onChange={handleImageChange}
+                  accept="image/*"
+                  className="hidden"
+                />
+              </label>
+            </div>
+
+            {/* User Info */}
+            <div className="text-center sm:text-left">
+              <p className="text-sm sm:text-lg font-semibold">User ID: {userId}</p>
+              {user && (
+                <div className="flex flex-col sm:flex-row sm:items-start justify-center sm:justify-start gap-2 sm:gap-3">
+                  <span className="text-sm sm:text-lg font-semibold text-gray-200 mt-3">
+                    Points:
+                  </span>
+                  <span className="text-5xl sm:text-6xl md:text-8xl font-extrabold text-cyan-200 drop-shadow-lg leading-none">
+                    {user.points}
+                  </span>
+                </div>
+              )}
+            </div>
           </div>
-          <div>
-            <p className="text-black-700 font-semibold">User ID: {userId}</p>
-        </div>
+          
+          {/* Form */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {[
+              { id: "firstName", label: "First Name" },
+              { id: "lastName", label: "Last Name" },
+              { id: "username", label: "Username" },
+              { id: "password", label: "Password", type: "password" },
+              { id: "email", label: "Email" },
+              { id: "phone", label: "Phone" },
+            ].map(({ id, label, type }) => (
+              <div key={id}>
+                <label
+                  htmlFor={id}
+                  className="block text-sm mb-1 font-medium text-gray-200"
+                >
+                  {label}
+                </label>
+                <input
+                  id={id}
+                  name={id}
+                  type={type || "text"}
+                  placeholder={label}
+                  value={formData[id]}
+                  onChange={handleChange}
+                  className="w-full p-3 rounded-xl border border-cyan-500 bg-cyan-900/50 text-white placeholder-gray-300 focus:ring-2 focus:ring-cyan-400 outline-none"
+                />
+              </div>
+            ))}
 
-        <div>
-            {user && (<p className="text-lg font-semibold mt-4">Points: <span className="text-green-700">{user.points}</span></p> )}
+            {/* Gender */}
+            <div>
+              <label className="block text-sm mb-1 font-medium text-gray-200">
+                Gender
+              </label>
+              <select
+                name="gender"
+                value={formData.gender}
+                onChange={handleChange}
+                className="w-full p-3 rounded-xl border border-cyan-500 bg-cyan-900/50 text-white focus:ring-2 focus:ring-cyan-400 outline-none"
+              >
+                <option value="">Select Gender</option>
+                <option value="male">Male</option>
+                <option value="female">Female</option>
+              </select>
+            </div>
+
+            {/* Birth Date */}
+            <div className="col-span-2">
+              <label className="block text-sm mb-1 font-medium text-gray-200">
+                Date of Birth
+              </label>
+              <div className="grid grid-cols-3 gap-3">
+                <select
+                  name="birthMonth"
+                  value={formData.birthMonth}
+                  onChange={handleChange}
+                  className="p-3 rounded-xl border border-cyan-500 bg-cyan-900/50 text-white focus:ring-2 focus:ring-cyan-400"
+                >
+                  <option value="">Month</option>
+                  {Array.from({ length: 12 }, (_, i) => (
+                    <option key={i} value={i + 1}>
+                      {i + 1}
+                    </option>
+                  ))}
+                </select>
+                <select
+                  name="birthDay"
+                  value={formData.birthDay}
+                  onChange={handleChange}
+                  className="p-3 rounded-xl border border-cyan-500 bg-cyan-900/50 text-white focus:ring-2 focus:ring-cyan-400"
+                >
+                  <option value="">Day</option>
+                  {Array.from({ length: 31 }, (_, i) => (
+                    <option key={i} value={i + 1}>
+                      {i + 1}
+                    </option>
+                  ))}
+                </select>
+                <select
+                  name="birthYear"
+                  value={formData.birthYear}
+                  onChange={handleChange}
+                  className="p-3 rounded-xl border border-cyan-500 bg-cyan-900/50 text-white focus:ring-2 focus:ring-cyan-400"
+                >
+                  <option value="">Year</option>
+                  {Array.from({ length: 50 }, (_, i) => (
+                    <option key={i} value={2025 - i}>
+                      {2025 - i}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </div>
           </div>
-        </div>
-
-        <div className="grid grid-cols-3 gap-4">
-        {/* First Name */}
-        <div>
-          <label htmlFor="firstName" className="block text-white mb-1 ml-5 font-semibold">First Name</label>
-          <input id="firstName" name="firstName" placeholder="First Name" onChange={handleChange} value={formData.firstName}
-            className="w-full p-3 pl-5 rounded-3xl border-2 border-white bg-transparent text-white placeholder-white outline-none focus:ring-2 focus:ring-white"
-          />
-        </div>
-
-        {/* Last Name */}
-        <div>
-          <label htmlFor="lastName" className="block text-white mb-1 ml-5 font-semibold">Last Name</label>
-          <input id="lastName" name="lastName" placeholder="Last Name" onChange={handleChange} value={formData.lastName}
-            className="w-full p-3 pl-5 rounded-3xl border-2 border-white bg-transparent text-white placeholder-white outline-none focus:ring-2 focus:ring-white"
-          />
-        </div>
-
-        {/* Gender */}
-        <div>
-          <label htmlFor="gender" className="block text-white mb-1 ml-5 font-semibold">Gender</label>
-          <div className="relative">
-            <select id="gender" name="gender" onChange={handleChange} value={formData.gender}
-              className="w-full p-3 pl-5 pr-10 rounded-3xl border-2 border-white bg-transparent text-white placeholder-white outline-none focus:ring-2 focus:ring-white appearance-none"
-            >
-              <option value="">Gender</option>
-              <option value="male">Male</option>
-              <option value="female">Female</option>
-            </select>
-            <div className="pointer-events-none absolute right-4 top-1/2 transform -translate-y-1/2 text-white">▼</div>
-          </div>
-        </div>
-
-        {/* Username */}
-        <div>
-          <label htmlFor="username" className="block text-white mb-1 ml-5 font-semibold">Username</label>
-          <input id="username" name="username" placeholder="Username" onChange={handleChange} value={formData.username} autoComplete="off"
-            className="w-full p-3 pl-5 rounded-3xl border-2 border-white bg-transparent text-white placeholder-white outline-none focus:ring-2 focus:ring-white"
-          />
-        </div>
-
-        {/* Birth Month */}
-        <div>
-          <label htmlFor="birthMonth" className="block text-white mb-1 ml-5 font-semibold">Birth Month</label>
-          <div className="relative">
-            <select id="birthMonth" name="birthMonth" onChange={handleChange} value={formData.birthMonth}
-              className="w-full p-3 pl-5 pr-10 rounded-3xl border-2 border-white bg-transparent text-white outline-none focus:ring-2 focus:ring-white appearance-none"
-            >
-              <option value="">Month</option>
-              {Array.from({ length: 12 }, (_, i) => <option key={i} value={i+1}>{i+1}</option>)}
-            </select>
-            <div className="pointer-events-none absolute right-4 top-1/2 transform -translate-y-1/2 text-white">▼</div>
-          </div>
-        </div>
-
-        {/* Birth Day */}
-        <div>
-          <label htmlFor="birthDay" className="block text-white mb-1 ml-5 font-semibold">Birth Day</label>
-          <div className="relative">
-            <select id="birthDay" name="birthDay" onChange={handleChange} value={formData.birthDay}
-              className="w-full p-3 pl-5 pr-10 rounded-3xl border-2 border-white bg-transparent text-white outline-none focus:ring-2 focus:ring-white appearance-none"
-            >
-              <option value="">Day</option>
-              {Array.from({ length: 31 }, (_, i) => <option key={i} value={i+1}>{i+1}</option>)}
-            </select>
-            <div className="pointer-events-none absolute right-4 top-1/2 transform -translate-y-1/2 text-white">▼</div>
-          </div>
-        </div>
-
-        {/* Password */}
-        <div>
-          <label htmlFor="password" className="block text-white mb-1 ml-5 font-semibold">Password</label>
-          <input id="password" name="password" placeholder="Password" type="password" onChange={handleChange} value={formData.password} autoComplete="off"
-            className="w-full p-3 pl-5 rounded-3xl border-2 border-white bg-transparent text-white placeholder-white outline-none focus:ring-2 focus:ring-white"
-          />
-        </div>
-
-        {/* Birth Year */}
-        <div>
-          <label htmlFor="birthYear" className="block text-white mb-1 ml-5 font-semibold">Birth Year</label>
-          <div className="relative">
-            <select id="birthYear" name="birthYear" onChange={handleChange} value={formData.birthYear}
-              className="w-full p-3 pl-5 pr-10 rounded-3xl border-2 border-white bg-transparent text-white outline-none focus:ring-2 focus:ring-white appearance-none"
-            >
-              <option value="">Year</option>
-              {Array.from({ length: 50 }, (_, i) => <option key={i} value={2025 - i}>{2025 - i}</option>)}
-            </select>
-            <div className="pointer-events-none absolute right-4 top-1/2 transform -translate-y-1/2 text-white">▼</div>
-          </div>
-        </div>
-
-        {/* Email */}
-        <div>
-          <label htmlFor="email" className="block text-white mb-1 ml-5 font-semibold">Email</label>
-          <input id="email" name="email" placeholder="Email" onChange={handleChange} value={formData.email}
-            className="w-full p-3 pl-5 rounded-3xl border-2 border-white bg-transparent text-white placeholder-white outline-none focus:ring-2 focus:ring-white"
-          />
-        </div>
-
-        {/* Phone */}
-        <div>
-          <label htmlFor="phone" className="block text-white mb-1 ml-5 font-semibold">Phone</label>
-          <input id="phone" name="phone" placeholder="Phone" onChange={handleChange} value={formData.phone}
-            className="w-full p-3 pl-5 rounded-3xl border-2 border-white bg-transparent text-white placeholder-white outline-none focus:ring-2 focus:ring-white"
-          />
         </div>
       </div>
-      </div>
-    </div>
     </div>
   );
 };

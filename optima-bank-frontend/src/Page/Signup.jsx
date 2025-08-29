@@ -1,6 +1,7 @@
 // src/Signup.js
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { AiOutlineEye, AiOutlineEyeInvisible } from "react-icons/ai";
 import Navbar from '../Navbar';
 
 export default function Signup() {
@@ -15,6 +16,9 @@ export default function Signup() {
     password: '',
     confirmPassword: ''
   });
+
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -126,14 +130,55 @@ export default function Signup() {
             <input type="text" name="firstName" placeholder="First Name" onChange={handleChange} value={formData.firstName} className="p-3 rounded-lg outline-none" required />
             <input type="text" name="lastName" placeholder="Last Name" onChange={handleChange} value={formData.lastName} className="p-3 rounded-lg outline-none" />
             <input type="text" name="username" placeholder="Username" onChange={handleChange} value={formData.username} className="p-3 rounded-lg outline-none col-span-2" required />
-            <input type="date" name="dob" placeholder="Date Of Birth" onChange={handleChange} value={formData.dob} className="p-3 rounded-lg outline-none col-span-2" required />
+            <input type="date" name="dob" onChange={handleChange} value={formData.dob} className="p-3 rounded-lg outline-none col-span-2" required />
             <input type="text" name="phone" placeholder="Phone No." onChange={handleChange} value={formData.phone} className="p-3 rounded-lg outline-none" required />
             <input type="email" name="email" placeholder="Email" onChange={handleChange} value={formData.email} className="p-3 rounded-lg outline-none" required />
-            <input type="password" name="password" placeholder="Password (min 6 characters)" onChange={handleChange} value={formData.password} className="p-3 rounded-lg outline-none" required />
-            <input type="password" name="confirmPassword" placeholder="Confirm Password" onChange={handleChange} value={formData.confirmPassword} className="p-3 rounded-lg outline-none" required />
-            <button type="submit" className="col-span-2 bg-white text-black font-bold py-2 rounded-full">Signup</button>
-          </form>
 
+            {/* Password with toggle */}
+            <div className="relative col-span-2 sm:col-span-1">
+              <input
+                type={showPassword ? "text" : "password"}
+                name="password"
+                placeholder="Password (min 6 characters)"
+                onChange={handleChange}
+                value={formData.password}
+                className="w-full p-3 pr-12 rounded-lg outline-none"
+                required
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-700"
+              >
+                {showPassword ? <AiOutlineEyeInvisible size={20} /> : <AiOutlineEye size={20} />}
+              </button>
+            </div>
+
+            {/* Confirm Password with toggle */}
+            <div className="relative col-span-2 sm:col-span-1">
+              <input
+                type={showConfirmPassword ? "text" : "password"}
+                name="confirmPassword"
+                placeholder="Confirm Password"
+                onChange={handleChange}
+                value={formData.confirmPassword}
+                className="w-full p-3 pr-12 rounded-lg outline-none"
+                required
+              />
+              <button
+                type="button"
+                onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-700"
+              >
+                {showConfirmPassword ? <AiOutlineEyeInvisible size={20} /> : <AiOutlineEye size={20} />}
+              </button>
+            </div>
+
+            <button type="submit" className="col-span-2 bg-white text-black font-bold py-2 rounded-full">
+              Signup
+            </button>
+          </form>
+          
           <p className="text-center text-white mt-4">
             Already have an account? <Link to="/" className="underline text-white">Login</Link>
           </p>
