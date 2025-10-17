@@ -142,7 +142,7 @@ app.post('/forgot-password', async (req, res) => {
       to: user.email,
       from: process.env.MAIL_USER,
       subject: 'Password Reset',
-      text: `Click this link to reset your password: http://localhost:3000/reset-password/${token}`,
+      text: `Click this link to reset your password: https://optimabank-gift1.vercel.app/reset-password/${token}`,
     };
 
     await transporter.sendMail(mailOptions);
