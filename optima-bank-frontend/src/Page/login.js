@@ -22,7 +22,7 @@ export default function LoginPage() {
     e.preventDefault();
 
     try {
-      const res = await fetch('http://localhost:5000/login', {
+      const res = await fetch('https://optimabank-gift1.onrender.com/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formData),
@@ -105,7 +105,7 @@ export default function LoginPage() {
           </form>
 
           <div className="mt-4 flex flex-col gap-3">
-            <a href="http://localhost:5000/auth/google">
+            <a href="https://optimabank-gift1.onrender.com/auth/google">
               <button className="w-3/4 mx-auto bg-white text-black font-bold py-2 rounded-full flex items-center justify-center gap-2">
                 <FcGoogle size={20} />
                 Continue with Google
