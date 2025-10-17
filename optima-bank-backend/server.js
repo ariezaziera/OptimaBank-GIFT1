@@ -203,7 +203,7 @@ app.get('/auth/google/callback',
       points: user.points ?? 0   // nullish coalescing, bukan falsy check
     };
     const query = new URLSearchParams(safeUser).toString();
-    res.redirect(`http://localhost:3000/dashboard?${query}`);
+    res.redirect(`https://optima-bank-gift-1-fae227uux-arieza-azieras-projects.vercel.app/dashboard?${query}`);
   }
 );
 
