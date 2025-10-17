@@ -22,7 +22,11 @@ const saltRounds = 10;
 
 // Middleware
 app.use(cors({
-  origin: 'http://localhost:3000',
+  origin: [
+    'http://localhost:3000',
+    'https://optimabank-gift1.vercel.app',
+    'https://optimabank-gift-1-fae227uux-arieza-azieras-projects.vercel.app'
+  ],
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE'],
 }));
