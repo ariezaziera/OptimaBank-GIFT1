@@ -7,7 +7,11 @@ passport.use(
     {
       clientID: process.env.GOOGLE_CLIENT_ID,      // ✅ make sure these are in your .env
       clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-      callbackURL: "https://optimabank-gift1.onrender.com/auth/google/callback",
+      callbackURL:
+        process.env.NODE_ENV === "production"
+          ? "https://optimabank-gift1.onrender.com/auth/google/callback"
+          : "http://localhost:5000/auth/google/callback",
+
     },
     async (accessToken, refreshToken, profile, done) => {
       try {
