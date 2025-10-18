@@ -20,7 +20,7 @@ const Voucher = () => {
   useEffect(() => {
     const fetchVouchers = async () => {
       try {
-        const res = await fetch('http://localhost:5000/voucher');
+        const res = await fetch('https://optimabank-gift1.onrender.com/voucher');
         const data = await res.json();
         setVouchers(data);
 
