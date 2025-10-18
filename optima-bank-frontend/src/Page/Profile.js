@@ -31,10 +31,15 @@ const Profile = () => {
     setUser(savedUser);
 
     const fetchProfile = async () => {
+      const baseURL =
+        window.location.hostname === "localhost"
+          ? "http://localhost:5000"
+          : "https://optimabank-gift1.onrender.com"; // 🟢 your deployed backend URL
+    
       try {
-        const res = await fetch(`http://localhost:5000/profile/${savedUser._id}`);
+        const res = await fetch(`${baseURL}/profile/${savedUser._id}`);
         const data = await res.json();
-
+    
         if (data) {
           setFormData((prev) => ({
             ...prev,
@@ -66,7 +71,8 @@ const Profile = () => {
   
     const frontendURL = isLocalhost
       ? "http://localhost:3000" // local frontend
-      : "https://optimabank-gift.vercel.app"; // production frontend
+      : "https://optimabank-gift.vercel.app"
+      : "https://optima-bank-gift-1-fae227uux-arieza-azieras-projects.vercel.app"; // production frontend
   
     try {
       const res = await fetch(`${backendURL}/logout`, {
