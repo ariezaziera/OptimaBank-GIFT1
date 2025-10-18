@@ -10,19 +10,27 @@ function ResetPassword() {
 
   const handleReset = async (e) => {
     e.preventDefault();
+  
+    const baseURL =
+      window.location.hostname === "localhost"
+        ? "http://localhost:5000"
+        : "https://optimabank-gift1.onrender.com"; // 🟢 deployed backend
+  
     try {
-      const res = await fetch(`http://localhost:5000/reset-password/${token}`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+      const res = await fetch(`${baseURL}/reset-password/${token}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ password }),
       });
-
+  
       const data = await res.json();
       setMessage(data.message);
     } catch (err) {
-      setMessage('Error resetting password.');
+      setMessage("Error resetting password.");
+      console.error("Reset password error:", err);
     }
   };
+
 
   return (
     <AuthLayout>
