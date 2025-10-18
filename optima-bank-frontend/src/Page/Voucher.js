@@ -52,25 +52,38 @@ const Voucher = () => {
   };
 
   const handleLogout = async () => {
-    const confirmLogout = window.confirm("Are you sure you want to logout?");
-    if (!confirmLogout) return;
-
+    if (!window.confirm("Are you sure you want to logout?")) return;
+  
+    // 🔹 Auto-detect environment
+    const isLocalhost = window.location.hostname === "localhost";
+  
+    // 🔹 Backend + frontend URLs
+    const backendURL = isLocalhost
+      ? "http://localhost:5000" // local backend
+      : "https://optimabank-gift1.onrender.com"; // production backend
+  
+    const frontendURL = isLocalhost
+      ? "http://localhost:3000" // local frontend
+      : "https://optimabank-gift.vercel.app"; // production frontend
+  
     try {
-      const res = await fetch('http://localhost:5000/logout', {
-        method: 'GET',
-        credentials: 'include',
+      const res = await fetch(`${backendURL}/logout`, {
+        method: "GET",
+        credentials: "include", // keeps session cookies
       });
-
+  
       if (res.ok) {
-        localStorage.removeItem('user');
-        window.location.href = 'http://localhost:3000/';
+        localStorage.removeItem("user");
+        window.location.href = frontendURL;
       } else {
-        console.error('Logout failed:', await res.json());
+        const errorData = await res.json();
+        console.error("Logout failed:", errorData);
       }
     } catch (err) {
-      console.error('Logout failed:', err);
+      console.error("Logout failed:", err);
     }
   };
+
 
   const filterVouchers = (search, category) => {
     let result = vouchers;
