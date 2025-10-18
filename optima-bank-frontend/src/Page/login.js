@@ -57,7 +57,7 @@ export default function LoginPage() {
         <div className="hidden md:flex flex-col justify-center flex-1 text-white text-left pr-56 pl-10 p-15">
           <h1 className="text-6xl font-extrabold mb-6">Online Banking</h1>
           <p className="text-lg text-gray-100 leading-relaxed">
-            Your trusted partner in online banking, keeping your money safe while making everyday banking simple and convenient. Also earn reward points with every transaction and redeem them for exclusive vouchers.
+            Your trusteddd partner in online banking, keeping your money safe while making everyday banking simple and convenient. Also earn reward points with every transaction and redeem them for exclusive vouchers.
           </p>
         </div>
 
