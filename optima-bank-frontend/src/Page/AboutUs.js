@@ -66,7 +66,8 @@ export default function AboutUs() {
   
     const frontendURL = isLocalhost
       ? "http://localhost:3000" // local frontend
-      : "https://optimabank-gift.vercel.app"; // production frontend
+      : "https://optimabank-gift.vercel.app"
+      : 'https://optima-bank-gift-1-fae227uux-arieza-azieras-projects.vercel.app',; // production frontend
   
     try {
       const res = await fetch(`${backendURL}/logout`, {
