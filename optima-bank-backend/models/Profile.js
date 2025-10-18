@@ -7,6 +7,36 @@ const Profile = () => {
   const [formData, setFormData] = useState({});
   const [userId, setUserId] = useState(null);
 
+  // ✅ Hardcoded backend route (local + production)
+  const BASE_URL =
+    window.location.hostname === 'localhost'
+      ? 'http://localhost:5000'
+      : 'https://your-production-server-url.com';
+
+  // ✅ Logout handler
+  const handleLogout = async () => {
+    if (!window.confirm('Are you sure you want to logout?')) return;
+
+    try {
+      const res = await fetch(`${BASE_URL}/logout`, {
+        method: 'GET',
+        credentials: 'include',
+      });
+
+      if (res.ok) {
+        localStorage.removeItem('user');
+        window.location.href =
+          window.location.hostname === 'localhost'
+            ? 'http://localhost:3000/'
+            : 'https://your-production-frontend-url.com/';
+      } else {
+        console.error('Logout failed:', await res.json());
+      }
+    } catch (err) {
+      console.error('Logout failed:', err);
+    }
+  };
+
   useEffect(() => {
     const savedUser = JSON.parse(localStorage.getItem('user'));
 
