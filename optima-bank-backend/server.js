@@ -25,6 +25,7 @@ app.use(cors({
   origin: [
     'http://localhost:3000',
     'https://optimabank-gift1.vercel.app',
+    'https://optima-bank-gift-1-fae227uux-arieza-azieras-projects.vercel.app',
     'https://optimabank-gift1.onrender.com/logout'
   ],
   credentials: true,
