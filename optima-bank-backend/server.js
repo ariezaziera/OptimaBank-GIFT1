@@ -19,18 +19,26 @@ const nodemailer = require('nodemailer');
 const bcrypt = require('bcrypt');
 const saltRounds = 10;
 
+// ✅ Fixed CORS configuration
+const FRONTEND_URLS = [
+  'http://localhost:3000',
+  'https://optimabank-gift1.vercel.app',
+  'https://optima-bank-gift-1-fae227uux-arieza-azieras-projects.vercel.app'
+];
 
-// Middleware
 app.use(cors({
-  origin: [
-    'http://localhost:3000',
-    'https://optimabank-gift1.vercel.app',
-    'https://optima-bank-gift-1-fae227uux-arieza-azieras-projects.vercel.app',
-    'https://optimabank-gift1.onrender.com/logout'
-  ],
+  origin: function (origin, callback) {
+    if (!origin || FRONTEND_URLS.includes(origin)) {
+      callback(null, true);
+    } else {
+      console.warn('❌ Blocked by CORS:', origin);
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE'],
 }));
+
 
 app.use(express.json());
 
@@ -117,7 +125,7 @@ app.post('/login', async (req, res) => {
 });
 
 
-// Forgot password route
+// Forgot password route ✅ Fixed ternary syntax
 app.post('/forgot-password', async (req, res) => {
   const { email } = req.body;
   try {
@@ -139,11 +147,11 @@ app.post('/forgot-password', async (req, res) => {
       },
     });
 
-    const frontendURL = process.env.NODE_ENV === 'production'
-      ? 'https://optimabank-gift1.vercel.app'
-      : 'http://localhost:3000'
-      : 'https://optima-bank-gift-1-fae227uux-arieza-azieras-projects.vercel.app';
-    
+    const frontendURL =
+      process.env.NODE_ENV === 'production'
+        ? 'https://optimabank-gift1.vercel.app'
+        : 'http://localhost:3000';
+
     const mailOptions = {
       to: user.email,
       from: process.env.MAIL_USER,
@@ -153,9 +161,8 @@ app.post('/forgot-password', async (req, res) => {
 
     await transporter.sendMail(mailOptions);
     res.json({ message: 'Reset email sent!' });
-
   } catch (err) {
-    console.error('Forgot password error:', err); // ✅ LOG IT
+    console.error('Forgot password error:', err);
     res.status(500).json({ message: 'Error sending email' });
   }
 });
@@ -278,6 +285,7 @@ app.put('/profile/update/:id', upload.single('profileImage'), async (req, res) =
     res.status(500).json({ message: 'Failed to update profile' });
   }
 });
+
 
 //voucher redeem
 app.get('/redeemed/:id', async (req, res) => {
