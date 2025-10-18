@@ -17,14 +17,20 @@ export default function History() {
   }, []);
 
   const fetchRedeemed = async (userId) => {
+    const baseURL =
+      window.location.hostname === "localhost"
+        ? "http://localhost:5000"
+        : "https://optimabank-gift1.onrender.com";
+  
     try {
-      const res = await fetch(`http://localhost:5000/redeemed/${userId}`);
+      const res = await fetch(`${baseURL}/redeemed/${userId}`);
       const data = await res.json();
       setRedeemedVouchers(data || []);
     } catch (err) {
-      console.error('Failed to fetch history:', err);
+      console.error("Failed to fetch history:", err);
     }
   };
+
 
   const handleLogout = async () => {
     if (!window.confirm("Are you sure you want to logout?")) return;
@@ -36,10 +42,11 @@ export default function History() {
     const backendURL = isLocalhost
       ? "http://localhost:5000" // local backend
       : "https://optimabank-gift1.onrender.com"; // production backend
-  
+
     const frontendURL = isLocalhost
       ? "http://localhost:3000" // local frontend
-      : "https://optimabank-gift.vercel.app"; // production frontend
+      : "https://optimabank-gift.vercel.app"
+      : "https://optima-bank-gift-1-fae227uux-arieza-azieras-projects.vercel.app"; // production frontend
   
     try {
       const res = await fetch(`${backendURL}/logout`, {
