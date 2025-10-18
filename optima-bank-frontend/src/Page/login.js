@@ -22,12 +22,18 @@ export default function LoginPage() {
     e.preventDefault();
 
     try {
-      const res = await fetch('https://optimabank-gift1.onrender.com/login', {
+      const baseURL =
+        window.location.hostname === "localhost"
+          ? "http://localhost:5000"
+          : "https://optimabank-gift1.onrender.com";
+      
+      const res = await fetch(`${baseURL}/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formData),
         credentials: 'include',
       });
+
 
       const data = await res.json();
 
