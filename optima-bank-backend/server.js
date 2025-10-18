@@ -26,6 +26,17 @@ const FRONTEND_URLS = [
   'https://optima-bank-gift-1-fae227uux-arieza-azieras-projects.vercel.app'
 ];
 
+const fs = require('fs');
+const buildPath = path.join(__dirname, 'client/build');
+if (fs.existsSync(buildPath)) {
+  app.use(express.static(buildPath));
+  app.get('*', (req, res) => {
+    res.sendFile(path.join(buildPath, 'index.html'));
+  });
+} else {
+  console.log('⚠️ No client/build folder found, skipping static serve');
+}
+
 app.use(cors({
   origin: function (origin, callback) {
     if (!origin || FRONTEND_URLS.includes(origin)) {
@@ -414,14 +425,6 @@ app.post('/redeemed', async (req, res) => {
   }
 });
 
-
-// Serve static files from React app (only in production)
-app.use(express.static(path.join(__dirname, 'client/build')));
-
-// Catch-all: send back React's index.html for any unknown route
-app.get('*', (req, res) => {
-  res.sendFile(path.join(__dirname, 'client/build', 'index.html'));
-});
 
 // Start server
 const PORT = process.env.PORT || 5000;
