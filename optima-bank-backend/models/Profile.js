@@ -11,7 +11,7 @@ const Profile = () => {
   const BASE_URL =
     window.location.hostname === 'localhost'
       ? 'http://localhost:5000'
-      : 'https://your-production-server-url.com';
+      : 'https://optimabank-gift1.onrender.com';
 
   // ✅ Logout handler
   const handleLogout = async () => {
@@ -28,7 +28,8 @@ const Profile = () => {
         window.location.href =
           window.location.hostname === 'localhost'
             ? 'http://localhost:3000/'
-            : 'https://your-production-frontend-url.com/';
+            : 'https://optimabank-gift1.vercel.app/'
+            : 'https://optima-bank-gift-1-fae227uux-arieza-azieras-projects.vercel.app/';
       } else {
         console.error('Logout failed:', await res.json());
       }
@@ -51,7 +52,7 @@ const Profile = () => {
       // ✅ fetch latest data from backend using _id
       const fetchUserProfile = async () => {
         try {
-          const res = await fetch(`http://localhost:5000/profile/${savedUser._id}`);
+          const res = await fetch(`https://optimabank-gift1.onrender.com/profile/${savedUser._id}`);
           if (res.ok) {
             const data = await res.json();
             setUser(data);
@@ -81,7 +82,7 @@ const Profile = () => {
 
   const handleSave = async () => {
     try {
-      const res = await fetch(`http://localhost:5000/profile/update/${userId}`, {
+      const res = await fetch(`https://optimabank-gift1.onrender.com/profile/update/${userId}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formData),
