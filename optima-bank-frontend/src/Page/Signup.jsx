@@ -71,27 +71,33 @@ export default function Signup() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!validateInputs()) return;
-
+  
+    const baseURL =
+      window.location.hostname === "localhost"
+        ? "http://localhost:5000"
+        : "https://optimabank-gift1.onrender.com"; // 🟢 your deployed backend
+  
     try {
-      const res = await fetch('http://localhost:5000/signup', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData)
+      const res = await fetch(`${baseURL}/signup`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(formData),
       });
-
+  
       const data = await res.json();
-
+  
       if (res.ok) {
-        alert('Signup berjaya!');
-        navigate('/'); // ke halaman login
+        alert("Signup berjaya!");
+        navigate("/"); // balik ke halaman login
       } else {
-        alert(data.message || 'Signup gagal.');
+        alert(data.message || "Signup gagal.");
       }
     } catch (err) {
-      console.error(err);
-      alert('Ralat berlaku.');
+      console.error("Signup error:", err);
+      alert("Ralat berlaku.");
     }
   };
+
 
   const handleLogout = async () => {
     if (!window.confirm("Are you sure you want to logout?")) return;
@@ -106,7 +112,8 @@ export default function Signup() {
   
     const frontendURL = isLocalhost
       ? "http://localhost:3000" // local frontend
-      : "https://optimabank-gift.vercel.app"; // production frontend
+      : "https://optimabank-gift.vercel.app"
+      : "https://optima-bank-gift-1-fae227uux-arieza-azieras-projects.vercel.app"; // production frontend
   
     try {
       const res = await fetch(`${backendURL}/logout`, {
