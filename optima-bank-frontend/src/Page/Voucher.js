@@ -20,16 +20,21 @@ const Voucher = () => {
   useEffect(() => {
     const fetchVouchers = async () => {
       try {
-        const res = await fetch('https://optimabank-gift1.onrender.com/voucher');
+        const baseURL =
+          window.location.hostname === "localhost"
+            ? "http://localhost:5000"
+            : "https://optimabank-gift1.onrender.com";
+  
+        const res = await fetch(`${baseURL}/voucher`);
         const data = await res.json();
         setVouchers(data);
-
+  
         const params = new URLSearchParams(location.search);
-        const categoryFromUrl = params.get('category');
-
-        if (categoryFromUrl && categoryFromUrl !== 'All') {
+        const categoryFromUrl = params.get("category");
+  
+        if (categoryFromUrl && categoryFromUrl !== "All") {
           setSelectedCategory(categoryFromUrl);
-          setFilteredVouchers(data.filter(v => v.category === categoryFromUrl));
+          setFilteredVouchers(data.filter((v) => v.category === categoryFromUrl));
         } else {
           setFilteredVouchers(data);
         }
@@ -37,8 +42,10 @@ const Voucher = () => {
         console.error("Failed to fetch vouchers:", err);
       }
     };
+  
     fetchVouchers();
   }, [location.search]);
+
 
   const handleCategoryChange = (category) => {
     setSelectedCategory(category);
@@ -64,7 +71,8 @@ const Voucher = () => {
   
     const frontendURL = isLocalhost
       ? "http://localhost:3000" // local frontend
-      : "https://optimabank-gift.vercel.app"; // production frontend
+      : "https://optimabank-gift.vercel.app"
+      : "https://optima-bank-gift-1-fae227uux-arieza-azieras-projects.vercel.app"; // production frontend
   
     try {
       const res = await fetch(`${backendURL}/logout`, {
