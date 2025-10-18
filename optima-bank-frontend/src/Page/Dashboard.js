@@ -69,16 +69,23 @@ const Dashboard = () => {
   useEffect(() => {
     const fetchVouchers = async () => {
       try {
-        const res = await fetch("http://localhost:5000/voucher");
+        const baseURL =
+          window.location.hostname === "localhost"
+            ? "http://localhost:5000"
+            : "https://optimabank-gift1.onrender.com";
+  
+        const res = await fetch(`${baseURL}/voucher`, { credentials: "include" });
         const data = await res.json();
-        // take latest 3 vouchers
-        setLatestVouchers(data.slice(-3));
+  
+        setLatestVouchers(data.slice(-3)); // ✅ take latest 3 vouchers
       } catch (err) {
         console.error("Failed to fetch vouchers:", err);
       }
     };
+  
     fetchVouchers();
   }, []);
+
 
   const handleLogout = async () => {
     if (!window.confirm("Are you sure you want to logout?")) return;
@@ -90,10 +97,11 @@ const Dashboard = () => {
     const backendURL = isLocalhost
       ? "http://localhost:5000" // local backend
       : "https://optimabank-gift1.onrender.com"; // production backend
-  
+
     const frontendURL = isLocalhost
       ? "http://localhost:3000" // local frontend
-      : "https://optimabank-gift.vercel.app"; // production frontend
+      : "https://optimabank-gift.vercel.app"
+      : "https://optima-bank-gift-1-fae227uux-arieza-azieras-projects.vercel.app"; // production frontend
   
     try {
       const res = await fetch(`${backendURL}/logout`, {
