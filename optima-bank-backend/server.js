@@ -415,9 +415,6 @@ app.post('/redeemed', async (req, res) => {
 });
 
 
-// Serve frontend build in production
-const path = require('path');
-
 // Serve static files from React app (only in production)
 app.use(express.static(path.join(__dirname, 'client/build')));
 
