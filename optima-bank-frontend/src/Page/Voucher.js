@@ -69,10 +69,13 @@ const Voucher = () => {
       ? "http://localhost:5000" // local backend
       : "https://optimabank-gift1.onrender.com"; // production backend
   
-    const frontendURL = isLocalhost
-      ? "http://localhost:3000" // local frontend
-      : "https://optimabank-gift.vercel.app"
-      : "https://optima-bank-gift-1-fae227uux-arieza-azieras-projects.vercel.app"; // production frontend
+    const FRONTEND_URL =
+      process.env.NODE_ENV === "production"
+        ? "https://optimabank-gift1.vercel.app" // main production
+        : "http://localhost:3000";
+    
+    const FRONTEND_URL_ALT = "https://optima-bank-gift-1-fae227uux-arieza-azieras-projects.vercel.app";
+
   
     try {
       const res = await fetch(`${backendURL}/logout`, {
