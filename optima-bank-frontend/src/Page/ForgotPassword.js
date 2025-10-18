@@ -6,15 +6,32 @@ function ForgotPassword() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const res = await fetch('http://localhost:5000/forgot-password', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email }),
-    });
-
-    const data = await res.json();
-    alert(data.message);
+  
+    const baseURL =
+      window.location.hostname === "localhost"
+        ? "http://localhost:5000"
+        : "https://optimabank-gift1.onrender.com";
+  
+    try {
+      const res = await fetch(`${baseURL}/forgot-password`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email }),
+      });
+  
+      const data = await res.json();
+  
+      if (res.ok) {
+        alert("Reset link has been sent to your email.");
+      } else {
+        alert(data.message || "Failed to send reset link.");
+      }
+    } catch (err) {
+      console.error("Error sending reset request:", err);
+      alert("Something went wrong. Please try again later.");
+    }
   };
+
 
   return (
     <AuthLayout>
