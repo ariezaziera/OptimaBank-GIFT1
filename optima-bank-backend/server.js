@@ -139,11 +139,16 @@ app.post('/forgot-password', async (req, res) => {
       },
     });
 
+    const frontendURL = process.env.NODE_ENV === 'production'
+      ? 'https://optimabank-gift1.vercel.app'
+      : 'http://localhost:3000'
+      : 'https://optima-bank-gift-1-fae227uux-arieza-azieras-projects.vercel.app';
+    
     const mailOptions = {
       to: user.email,
       from: process.env.MAIL_USER,
       subject: 'Password Reset',
-      text: `Click this link to reset your password: https://optimabank-gift1.vercel.app/reset-password/${token}`,
+      text: `Click this link to reset your password: ${frontendURL}/reset-password/${token}`,
     };
 
     await transporter.sendMail(mailOptions);
@@ -193,7 +198,6 @@ app.get('/auth/google/callback',
     session: true
   }),
   (req, res) => {
-    // Option 1: Send user info via redirect query
     const user = req.user;
     const safeUser = {
       _id: user._id,
@@ -201,12 +205,26 @@ app.get('/auth/google/callback',
       firstName: user.firstName,
       lastName: user.lastName,
       profileImage: user.profileImage || '',
-      points: user.points ?? 0   // nullish coalescing, bukan falsy check
+      points: user.points ?? 0
     };
     const query = new URLSearchParams(safeUser).toString();
-    res.redirect(`https://optima-bank-gift-1-fae227uux-arieza-azieras-projects.vercel.app/dashboard?${query}`);
+
+    // ✅ Use main Vercel link in production
+    const PROD_REDIRECT = 'https://optimabank-gift1.vercel.app/dashboard';
+    // ✅ Use preview or localhost in dev
+    const DEV_REDIRECT = 'http://localhost:3000/dashboard';
+    const PREVIEW_REDIRECT = 'https://optima-bank-gift-1-fae227uux-arieza-azieras-projects.vercel.app/dashboard';
+
+    // ✅ Automatically pick the right redirect
+    const redirectBase =
+      process.env.NODE_ENV === 'production'
+        ? PROD_REDIRECT
+        : PREVIEW_REDIRECT || DEV_REDIRECT;
+
+    res.redirect(`${redirectBase}?${query}`);
   }
 );
+
 
 app.get('/logout', (req, res) => {
   req.logout(err => {
